@@ -1,0 +1,462 @@
+.home {
+  margin-top: 80px;
+  width: 100%;
+  background-color: #fff;
+}
+
+.container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+  box-sizing: border-box;
+}
+
+/* Hero Section */
+.hero {
+  background: url('https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80') center/cover no-repeat;
+  color: white;
+  text-align: center;
+  padding: 120px 20px;
+  position: relative;
+}
+
+.hero-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.hero-content {
+  position: relative;
+  z-index: 2;
+}
+
+.hero-content h1 {
+  font-size: 3.5rem;
+  font-weight: bold;
+  margin-bottom: 15px;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.hero-content p {
+  font-size: 1.5rem;
+  opacity: 0.9;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+/* Carousel Section */
+.carousel-section {
+  padding: 60px 20px;
+  background-color: #f8f9fa;
+}
+
+.carousel-section h2 {
+  font-size: 2rem;
+  text-align: center;
+  margin-bottom: 40px;
+  color: #333;
+}
+
+.carousel-container {
+  position: relative;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.carousel-wrapper {
+  overflow: hidden;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+}
+
+.carousel-track {
+  display: flex;
+  transition: transform 0.5s ease-in-out;
+}
+
+.carousel-slide {
+  min-width: 100%;
+  height: 400px;
+}
+
+.offer-card {
+  height: 100%;
+  position: relative;
+  display: flex;
+  align-items: center;
+  padding: 40px;
+  color: white;
+  overflow: hidden;
+  background-size: cover;
+  background-position: center;
+}
+
+.offer-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.4);
+}
+
+.offer-content {
+  position: relative;
+  z-index: 2;
+  max-width: 80%;
+}
+
+.offer-content h3 {
+  font-size: 2.2rem;
+  font-weight: bold;
+  margin-bottom: 15px;
+  line-height: 1.2;
+  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.8);
+}
+
+.offer-content p {
+  font-size: 1.3rem;
+  opacity: 0.9;
+  margin: 0;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+}
+
+/* Operator Features */
+.operator-section {
+  padding: 60px 20px;
+  background-color: #fff;
+}
+
+.operator-section h2 {
+  font-size: 2rem;
+  text-align: center;
+  margin-bottom: 40px;
+  color: #333;
+}
+
+.operator-grid {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+}
+
+.operator-card {
+  border-radius: 8px;
+  padding: 15px 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  background-size: 100px;
+  background-position: top right;
+  background-repeat: no-repeat;
+  border: 1px solid #e0e0e0;
+  min-height: 180px;
+  width: 220px;
+  display: flex;
+  flex-direction: column;
+  flex: 0 0 auto;
+  background-color: #fff;
+}
+
+/* Individual operator card backgrounds with their logos */
+.operator-card[data-operator="airtel"] {
+  background-image: url('https://upload.wikimedia.org/wikipedia/commons/thumb/5/5a/Airtel-vector-logo.svg/1200px-Airtel-vector-logo.svg.png');
+  background-size: 80px;
+  background-position: calc(100% - 10px) 10px;
+}
+
+.operator-card[data-operator="jio"] {
+  background-image: url('https://upload.wikimedia.org/wikipedia/commons/thumb/9/95/Reliance_Jio_Logo_%28October_2015%29.svg/1200px-Reliance_Jio_Logo_%28October_2015%29.svg.png');
+  background-size: 60px;
+  background-position: calc(100% - 15px) 15px;
+}
+
+.operator-card[data-operator="vi"] {
+  background-image: url('https://upload.wikimedia.org/wikipedia/commons/thumb/7/7e/Vi_logo.svg/1200px-Vi_logo.svg.png');
+  background-size: 50px;
+  background-position: calc(100% - 15px) 15px;
+}
+
+.operator-card[data-operator="bsnl"] {
+  background-image: url('https://upload.wikimedia.org/wikipedia/en/thumb/5/53/BSNL_Logo.svg/1200px-BSNL_Logo.svg.png');
+  background-size: 70px;
+  background-position: calc(100% - 10px) 10px;
+}
+
+.operator-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+  z-index: 1;
+}
+
+.operator-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.operator-card:hover .operator-overlay {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.1) 100%);
+}
+
+.operator-card h3 {
+  font-size: 1.3rem;
+  color: #333;
+  margin-bottom: 12px;
+  position: relative;
+  z-index: 2;
+  font-weight: 600;
+}
+
+.operator-card ul {
+  list-style: disc;
+  padding-left: 18px;
+  color: #555;
+  margin-bottom: 12px;
+  position: relative;
+  z-index: 2;
+  font-size: 0.9rem;
+}
+
+.operator-card li {
+  margin-bottom: 6px;
+  position: relative;
+  z-index: 2;
+}
+
+.click-hint {
+  margin-top: auto;
+  padding: 6px 10px;
+  background: #f0f8ff;
+  border: 1px solid #667eea;
+  border-radius: 4px;
+  color: #667eea;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-align: center;
+  transition: all 0.3s ease;
+  position: relative;
+  z-index: 2;
+}
+
+.operator-card:hover .click-hint {
+  background: #667eea;
+  color: white;
+}
+
+/* New Footer Styles */
+.footer {
+  background-color: #f8f8f8;
+  padding: 60px 0 20px;
+  color: #333;
+  font-family: 'Arial', sans-serif;
+}
+
+.footer-content {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 40px;
+  margin-bottom: 40px;
+}
+
+.footer-column {
+  flex: 1;
+  min-width: 200px;
+}
+
+.footer-column h4 {
+  font-size: 1.2rem;
+  margin-bottom: 20px;
+  color: #222;
+  font-weight: 600;
+}
+
+.footer-column ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.footer-column ul li {
+  margin-bottom: 12px;
+}
+
+.footer-column ul li a {
+  color: #555;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.footer-column ul li a:hover {
+  color: #667eea;
+}
+
+.social-icons {
+  display: flex;
+  gap: 15px;
+  margin-top: 20px;
+}
+
+.social-icons a {
+  color: #555;
+  font-size: 1.2rem;
+  transition: color 0.3s ease, transform 0.3s ease;
+}
+
+.social-icons a:hover {
+  color: #667eea;
+  transform: translateY(-3px);
+}
+
+.copyright {
+  text-align: center;
+  padding-top: 20px;
+  border-top: 1px solid #e0e0e0;
+  color: #777;
+  font-size: 0.9rem;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .operator-grid {
+    gap: 12px;
+  }
+  
+  .operator-card {
+    width: 200px;
+    min-height: 170px;
+  }
+  
+  .operator-card[data-operator="airtel"] {
+    background-size: 70px;
+  }
+  
+  .operator-card[data-operator="jio"] {
+    background-size: 50px;
+  }
+  
+  .operator-card[data-operator="vi"] {
+    background-size: 45px;
+  }
+  
+  .operator-card[data-operator="bsnl"] {
+    background-size: 60px;
+  }
+}
+
+@media (max-width: 768px) {
+  .hero {
+    padding: 80px 20px;
+  }
+  
+  .hero-content h1 {
+    font-size: 2.5rem;
+  }
+  
+  .hero-content p {
+    font-size: 1.2rem;
+  }
+  
+  .carousel-slide {
+    height: 300px;
+  }
+  
+  .offer-card {
+    padding: 30px 20px;
+  }
+  
+  .offer-content h3 {
+    font-size: 1.8rem;
+  }
+  
+  .offer-content p {
+    font-size: 1.1rem;
+  }
+  
+  .operator-grid {
+    gap: 15px;
+    padding: 0 10px;
+  }
+  
+  .operator-card {
+    width: 190px;
+    min-height: 160px;
+  }
+  
+  .operator-card[data-operator="airtel"] {
+    background-size: 60px;
+    background-position: calc(100% - 8px) 8px;
+  }
+  
+  .operator-card[data-operator="jio"] {
+    background-size: 45px;
+    background-position: calc(100% - 10px) 10px;
+  }
+  
+  .operator-card[data-operator="vi"] {
+    background-size: 40px;
+    background-position: calc(100% - 10px) 10px;
+  }
+  
+  .operator-card[data-operator="bsnl"] {
+    background-size: 50px;
+    background-position: calc(100% - 8px) 8px;
+  }
+  
+  .footer-content {
+    flex-direction: column;
+    gap: 30px;
+  }
+  
+  .footer-column {
+    min-width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero-content h1 {
+    font-size: 2rem;
+  }
+  
+  .hero-content p {
+    font-size: 1rem;
+  }
+  
+  .offer-card {
+    padding: 20px;
+    text-align: center;
+  }
+  
+  .offer-content {
+    max-width: 100%;
+  }
+  
+  .operator-grid {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  
+  .operator-card {
+    width: 100%;
+    max-width: 280px;
+    min-height: 180px;
+  }
+  
+  .social-icons {
+    justify-content: center;
+  }
+}
