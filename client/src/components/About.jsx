@@ -19,14 +19,17 @@ const About = () => {
           <div className="overview-content">
             <h2>Who We Are</h2>
             <p>
-              Top It Up is India’s leading mobile recharge platform, revolutionizing the way people
-              top up their mobile connections. Since our inception in 2020, we’ve provided fast,
+              Top It Up is India's leading mobile recharge platform, revolutionizing the way people
+              top up their mobile connections. Since our inception in 2020, we've provided fast,
               secure, and convenient recharge services to millions across the country.
             </p>
             <img 
-              src="https://cdn.pixabay.com/photo/2016/11/29/06/15/office-1867759_1280.jpg" 
-              alt="Company Overview" 
+              src="https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=1200&h=600&fit=crop" 
+              alt="Company Overview - Mobile Technology" 
               className="overview-img"
+              onError={(e) => {
+                e.target.src = "https://via.placeholder.com/1200x600/2c2c2c/ffffff?text=Top+It+Up+-+Mobile+Recharge+Platform";
+              }}
             />
           </div>
         </div>
@@ -103,6 +106,12 @@ const About = () => {
               <h4>Sunita Kapoor</h4>
               <p className="member-title">Head of Customer Experience</p>
               <p className="member-desc">Expert in customer success and user experience</p>
+            </div>
+            <div className="team-member">
+              <img src="https://randomuser.me/api/portraits/women/68.jpg" className="member-avatar-img" alt="Head of Product" />
+              <h4>Asha Menon</h4>
+              <p className="member-title">Head of Product</p>
+              <p className="member-desc">Leads product strategy and roadmap with a strong UX focus</p>
             </div>
           </div>
         </div>

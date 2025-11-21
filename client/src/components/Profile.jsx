@@ -1,28 +1,49 @@
 import React, { useState, useEffect } from 'react';
+import { Button, Card, LoadingSpinner, ErrorMessage } from './common';
+import { toast } from '../utils/toast';
 import './Profile.css';
 
 const Profile = ({ currentUser }) => {
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const [addAmount, setAddAmount] = useState('');
   const [showAddMoney, setShowAddMoney] = useState(false);
+  const [addingMoney, setAddingMoney] = useState(false);
+  const [editMode, setEditMode] = useState(false);
+  const [localName, setLocalName] = useState('');
+  const [localPhone, setLocalPhone] = useState('');
+  const [updating, setUpdating] = useState(false);
 
   useEffect(() => {
     fetchUserData();
   }, []);
 
   const fetchUserData = async () => {
+    setLoading(true);
+    setError('');
     try {
       const token = localStorage.getItem('token');
+      if (!token) {
+        setError('Please login to view profile');
+        return;
+      }
       const response = await fetch('http://localhost:5000/api/v1/users/profile', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
       });
+      if (!response.ok) {
+        throw new Error('Failed to fetch profile');
+      }
       const data = await response.json();
       setUserData(data);
+      setLocalName(data?.name || '');
+      setLocalPhone(data?.phone || '');
     } catch (error) {
       console.error('Error fetching user data:', error);
+      setError('Failed to load profile data');
+      toast.error('Failed to load profile');
     } finally {
       setLoading(false);
     }
@@ -30,10 +51,11 @@ const Profile = ({ currentUser }) => {
 
   const handleAddMoney = async () => {
     if (!addAmount || addAmount <= 0) {
-      alert('Please enter a valid amount');
+      toast.warning('Please enter a valid amount');
       return;
     }
 
+    setAddingMoney(true);
     try {
       const token = localStorage.getItem('token');
       const response = await fetch('http://localhost:5000/api/v1/users/balance', {
@@ -50,19 +72,84 @@ const Profile = ({ currentUser }) => {
         setUserData(prev => ({ ...prev, balance: data.balance }));
         setAddAmount('');
         setShowAddMoney(false);
-        alert(`Successfully added ₹${addAmount} to your wallet!`);
+        toast.success(`Successfully added ₹${addAmount} to your wallet!`);
       } else {
-        alert('Failed to add money to wallet');
+        toast.error('Failed to add money to wallet');
       }
     } catch (error) {
-      alert('Error adding money to wallet');
+      console.error('Error adding money:', error);
+      toast.error('Error adding money to wallet');
+    } finally {
+      setAddingMoney(false);
+    }
+  };
+
+  const handleCopy = (text) => {
+    if (!text) return;
+    if (navigator.clipboard && window.isSecureContext) {
+      navigator.clipboard.writeText(text).then(() => alert('Copied to clipboard'));
+    } else {
+      const el = document.createElement('textarea');
+      el.value = text;
+      document.body.appendChild(el);
+      el.select();
+      try { document.execCommand('copy'); alert('Copied to clipboard'); } catch(e) { alert('Copy failed'); }
+      document.body.removeChild(el);
+    }
+  };
+
+  const toggleEdit = () => {
+    setEditMode(!editMode);
+    // reset local values when entering edit mode
+    if (userData) {
+      setLocalName(userData.name || '');
+      setLocalPhone(userData.phone || '');
+    }
+  };
+
+  const saveProfile = async () => {
+    setUpdating(true);
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('http://localhost:5000/api/v1/users/profile', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify({ name: localName, phone: localPhone })
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setUserData(prev => ({ ...prev, name: data.name, phone: data.phone }));
+        setEditMode(false);
+        toast.success('Profile updated successfully');
+      } else {
+        toast.error('Failed to update profile');
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error('Error updating profile');
+    } finally {
+      setUpdating(false);
     }
   };
 
   if (loading) {
     return (
       <div className="profile">
-        <div className="loading">Loading profile...</div>
+        <LoadingSpinner fullscreen text="Loading profile..." />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="profile">
+        <div className="error-container">
+          <ErrorMessage 
+            message={error}
+            type="error"
+            onRetry={fetchUserData}
+          />
+        </div>
       </div>
     );
   }
@@ -70,37 +157,61 @@ const Profile = ({ currentUser }) => {
   return (
     <div className="profile">
       <div className="profile-container">
-        <div className="profile-header">
-          <div className="profile-avatar">
-            <span className="avatar-text">{currentUser.charAt(0).toUpperCase()}</span>
-          </div>
-          <h2>Welcome, {currentUser}!</h2>
-          <p className="profile-subtitle">Manage your mobile recharge account</p>
-        </div>
+        <div className="profile-left">
+          <div className="profile-card">
+            <div className="profile-avatar big">
+              <span className="avatar-text">{(userData?.name || currentUser || 'U').charAt(0).toUpperCase()}</span>
+            </div>
+            <h2 className="name-title">{userData?.name || currentUser}</h2>
+            <p className="profile-subtitle">Manage your mobile recharge account</p>
 
-        <div className="profile-content">
-          <div className="profile-section">
-            <h3>Personal Information</h3>
-            <div className="info-grid">
-              <div className="info-item">
-                <label>Username:</label>
-                <span>{userData?.name || currentUser}</span>
+            <div className="personal-info">
+              <div className="info-row">
+                <div>
+                  <div className="info-label">Email</div>
+                  <div className="info-value">{userData?.email || `${currentUser.toLowerCase()}@example.com`}</div>
+                </div>
+                <button className="copy-btn" onClick={() => handleCopy(userData?.email || `${currentUser.toLowerCase()}@example.com`)}>Copy</button>
               </div>
-              <div className="info-item">
-                <label>Email:</label>
-                <span>{userData?.email || `${currentUser.toLowerCase()}@example.com`}</span>
+
+              <div className="info-row">
+                <div>
+                  <div className="info-label">Phone</div>
+                  <div className="info-value">{userData?.phone || '+91 98765 43210'}</div>
+                </div>
+                <button className="copy-btn" onClick={() => handleCopy(userData?.phone || '+91 98765 43210')}>Copy</button>
               </div>
-              <div className="info-item">
-                <label>Phone:</label>
-                <span>{userData?.phone || '+91 98765 43210'}</span>
+
+              <div className="info-row">
+                <div>
+                  <div className="info-label">Member Since</div>
+                  <div className="info-value">{userData?.createdAt ? new Date(userData.createdAt).toLocaleDateString() : 'January 2025'}</div>
+                </div>
               </div>
-              <div className="info-item">
-                <label>Member Since:</label>
-                <span>{userData?.createdAt ? new Date(userData.createdAt).toLocaleDateString() : 'January 2025'}</span>
+
+              <div className="profile-actions">
+                {!editMode ? (
+                  <Button variant="primary" onClick={toggleEdit}>Edit Profile</Button>
+                ) : (
+                  <>
+                    <input className="inline-input" value={localName} onChange={(e) => setLocalName(e.target.value)} placeholder="Name" />
+                    <input className="inline-input" value={localPhone} onChange={(e) => setLocalPhone(e.target.value)} placeholder="Phone" />
+                    <div style={{display:'flex',gap:8, marginTop: 8}}>
+                      <Button variant="primary" onClick={saveProfile} loading={updating} disabled={updating}>
+                        Save
+                      </Button>
+                      <Button variant="outline" onClick={toggleEdit} disabled={updating}>
+                        Cancel
+                      </Button>
+                    </div>
+                  </>
+                )}
               </div>
             </div>
           </div>
+        </div>
 
+        <div className="profile-right">
           <div className="profile-section">
             <h3>Wallet Balance</h3>
             <div className="wallet-section">
@@ -108,14 +219,13 @@ const Profile = ({ currentUser }) => {
                 <span className="balance-amount">₹{userData?.balance || 0}</span>
                 <span className="balance-label">Available Balance</span>
               </div>
-              <button 
-                className="add-money-btn"
+              <Button 
+                variant={showAddMoney ? "outline" : "success"}
                 onClick={() => setShowAddMoney(!showAddMoney)}
               >
                 {showAddMoney ? 'Cancel' : 'Add Money'}
-              </button>
+              </Button>
             </div>
-            
             {showAddMoney && (
               <div className="add-money-form">
                 <input
@@ -124,13 +234,17 @@ const Profile = ({ currentUser }) => {
                   value={addAmount}
                   onChange={(e) => setAddAmount(e.target.value)}
                   className="amount-input"
+                  disabled={addingMoney}
                 />
-                <button 
-                  className="confirm-btn"
+                <Button 
+                  variant="success"
                   onClick={handleAddMoney}
+                  loading={addingMoney}
+                  disabled={addingMoney || !addAmount}
+                  fullWidth
                 >
                   Add Money
-                </button>
+                </Button>
               </div>
             )}
           </div>
@@ -138,10 +252,16 @@ const Profile = ({ currentUser }) => {
           <div className="profile-section">
             <h3>Quick Actions</h3>
             <div className="actions-grid">
-              <button className="action-btn primary">New Recharge</button>
-              <button className="action-btn">Recharge History</button>
-              <button className="action-btn">Update Profile</button>
-              <button className="action-btn">Wallet Balance</button>
+              <Button variant="primary">New Recharge</Button>
+              <Button variant="secondary">Recharge History</Button>
+              <Button variant="secondary">Wallet Balance</Button>
+            </div>
+          </div>
+
+          <div className="profile-section">
+            <h3>Recent Activity</h3>
+            <div className="recent-list">
+              <div className="recent-item">No recent transactions — try a recharge.</div>
             </div>
           </div>
         </div>

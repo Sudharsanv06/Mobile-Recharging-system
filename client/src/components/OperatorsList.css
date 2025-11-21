@@ -1,0 +1,364 @@
+/* Operators List Container */
+.operators-list-container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  padding: 100px 2rem 3rem;
+}
+
+.operators-content {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.operators-header {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.operators-title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #2d3748;
+  margin-bottom: 0.5rem;
+}
+
+.operators-subtitle {
+  font-size: 1.1rem;
+  color: #718096;
+}
+
+/* Loading State */
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  gap: 1.5rem;
+}
+
+.loading-spinner {
+  width: 50px;
+  height: 50px;
+  border: 4px solid #e2e8f0;
+  border-top-color: #667eea;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.loading-text {
+  font-size: 1.1rem;
+  color: #718096;
+  font-weight: 500;
+}
+
+/* Skeleton Loading */
+.operators-grid-skeleton {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.5rem;
+}
+
+.skeleton-card {
+  background: white;
+  border-radius: 16px;
+  padding: 2rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.skeleton-logo {
+  width: 80px;
+  height: 80px;
+  background: #e2e8f0;
+  border-radius: 50%;
+  margin: 0 auto 1rem;
+}
+
+.skeleton-name {
+  height: 24px;
+  background: #e2e8f0;
+  border-radius: 4px;
+  margin-bottom: 0.5rem;
+}
+
+.skeleton-circle {
+  height: 16px;
+  background: #e2e8f0;
+  border-radius: 4px;
+  width: 60%;
+  margin: 0 auto;
+}
+
+/* Operators Grid */
+.operators-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.5rem;
+  animation: fadeIn 0.5s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Operator Card */
+.operator-card {
+  background: white;
+  border-radius: 16px;
+  padding: 2rem;
+  text-decoration: none;
+  color: inherit;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  border: 2px solid transparent;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+
+.operator-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+  transform: scaleX(0);
+  transition: transform 0.3s ease;
+}
+
+.operator-card:hover::before {
+  transform: scaleX(1);
+}
+
+.operator-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 12px 24px rgba(102, 126, 234, 0.2);
+  border-color: #667eea;
+}
+
+.operator-card.selected {
+  border-color: #667eea;
+  background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+  box-shadow: 0 8px 16px rgba(102, 126, 234, 0.15);
+}
+
+/* Operator Logo */
+.operator-logo-container {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+  border: 3px solid #e2e8f0;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.operator-card:hover .operator-logo-container {
+  border-color: #667eea;
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+}
+
+.operator-logo {
+  width: 70px;
+  height: 70px;
+  object-fit: contain;
+  transition: transform 0.3s ease;
+}
+
+.operator-card:hover .operator-logo {
+  transform: scale(1.1);
+}
+
+.operator-logo-fallback {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #667eea;
+}
+
+/* Operator Info */
+.operator-info {
+  text-align: center;
+  width: 100%;
+}
+
+.operator-name {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #2d3748;
+  margin-bottom: 0.25rem;
+  transition: color 0.3s ease;
+}
+
+.operator-card:hover .operator-name {
+  color: #667eea;
+}
+
+.operator-circle {
+  font-size: 0.9rem;
+  color: #718096;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.operator-circle::before {
+  content: '📍';
+}
+
+/* Badge */
+.operator-badge {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  opacity: 0;
+  transform: translateY(-10px);
+  transition: all 0.3s ease;
+}
+
+.operator-card:hover .operator-badge {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Empty State */
+.empty-state {
+  text-align: center;
+  padding: 4rem 2rem;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+.empty-state-icon {
+  font-size: 4rem;
+  margin-bottom: 1rem;
+}
+
+.empty-state-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #2d3748;
+  margin-bottom: 0.5rem;
+}
+
+.empty-state-text {
+  font-size: 1rem;
+  color: #718096;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .operators-grid,
+  .operators-grid-skeleton {
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 1.25rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .operators-list-container {
+    padding: 80px 1rem 2rem;
+  }
+
+  .operators-title {
+    font-size: 2rem;
+  }
+
+  .operators-subtitle {
+    font-size: 1rem;
+  }
+
+  .operators-grid,
+  .operators-grid-skeleton {
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1rem;
+  }
+
+  .operator-card {
+    padding: 1.5rem;
+  }
+
+  .operator-logo-container {
+    width: 80px;
+    height: 80px;
+  }
+
+  .operator-logo {
+    width: 55px;
+    height: 55px;
+  }
+
+  .operator-name {
+    font-size: 1.1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .operators-grid,
+  .operators-grid-skeleton {
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+  }
+
+  .operator-card {
+    padding: 1rem;
+  }
+
+  .operator-logo-container {
+    width: 70px;
+    height: 70px;
+  }
+
+  .operator-logo {
+    width: 50px;
+    height: 50px;
+  }
+
+  .operator-name {
+    font-size: 1rem;
+  }
+
+  .operator-circle {
+    font-size: 0.8rem;
+  }
+}

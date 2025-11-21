@@ -1,15 +1,17 @@
 .bsnl-page {
   margin-top: 80px;
   min-height: 100vh;
-  background: linear-gradient(135deg, #fff8f0 0%, #ffede0 100%);
+  background: linear-gradient(135deg, #e6f2ff 0%, #cce5ff 100%);
+  scroll-behavior: smooth;
+  position: relative;
 }
 
 /* Operator Navbar */
 .operator-navbar {
-  background: linear-gradient(135deg, #ff6600 0%, #e55a00 100%);
-  border-bottom: 1px solid #e55a00;
+  background: linear-gradient(135deg, #005baa 0%, #004080 100%);
+  border-bottom: 1px solid #004080;
   padding: 12px 0;
-  box-shadow: 0 2px 8px rgba(255, 102, 0, 0.3);
+  box-shadow: 0 2px 8px rgba(0, 91, 170, 0.3);
   position: relative;
   z-index: 2000;
 }
@@ -27,11 +29,15 @@
   display: flex;
   align-items: center;
   gap: 12px;
+  background: white;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
 }
 
 .bsnl-logo {
-  height: 50px;
+  height: 45px;
   width: auto;
+  object-fit: contain;
 }
 
 .operator-name {
@@ -130,7 +136,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #ff6600;
+  color: #005baa;
   font-weight: 600;
   font-size: 0.9rem;
 }
@@ -145,9 +151,9 @@
 .main-content {
   display: flex;
   max-width: 1200px;
-  margin: 20px auto;
+  margin: 0 auto;
   gap: 24px;
-  padding: 0 20px;
+  padding: 30px 20px;
   position: relative;
   z-index: 1;
 }
@@ -226,6 +232,7 @@
 .search-input {
   width: 100%;
   padding: 12px 16px;
+  padding-right: 85px;
   border: 2px solid #e9ecef;
   border-radius: 12px;
   font-size: 1rem;
@@ -246,9 +253,10 @@
 
 .search-btn {
   position: absolute;
-  right: 4px;
-  top: 4px;
-  background: #ff6600;
+  right: 6px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: #005baa;
   color: white;
   border: none;
   padding: 8px 16px;
@@ -260,7 +268,7 @@
 }
 
 .search-btn:hover {
-  background: #e55a00;
+  background: #004080;
 }
 
 /* Right Panel */
@@ -304,11 +312,11 @@
 }
 
 .pack-categories button.active {
-  background: #ff6600;
+  background: #005baa;
   color: white;
-  border-color: #ff6600;
+  border-color: #005baa;
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(255, 102, 0, 0.3);
+  box-shadow: 0 4px 12px rgba(0, 91, 170, 0.3);
 }
 
 .packs-grid {
@@ -338,7 +346,7 @@
   left: 0;
   width: 4px;
   height: 100%;
-  background: linear-gradient(135deg, #ff6600, #e55a00);
+  background: linear-gradient(135deg, #005baa, #004080);
 }
 
 .pack-card:hover {
@@ -390,7 +398,7 @@
 
 .recharge-btn {
   width: 100%;
-  background: linear-gradient(135deg, #ff6600, #e55a00);
+  background: linear-gradient(135deg, #005baa, #004080);
   color: white;
   border: none;
   padding: 12px;
@@ -402,9 +410,9 @@
 }
 
 .recharge-btn:hover {
-  background: linear-gradient(135deg, #e55a00, #cc4d00);
+  background: linear-gradient(135deg, #004080, #003366);
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(255, 102, 0, 0.3);
+  box-shadow: 0 4px 12px rgba(0, 91, 170, 0.3);
 }
 
 /* Responsive Design */

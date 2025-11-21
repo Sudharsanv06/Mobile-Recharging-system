@@ -1,0 +1,108 @@
+@import '../../styles/variables.css';
+
+.error-message {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--spacing-md);
+  padding: var(--spacing-md) var(--spacing-lg);
+  border-radius: var(--radius-md);
+  border: 1px solid;
+  margin-bottom: var(--spacing-md);
+  animation: slideIn var(--transition-base);
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.error-message--error {
+  background-color: var(--color-error-light);
+  border-color: var(--color-error);
+  color: #991b1b;
+}
+
+.error-message--warning {
+  background-color: var(--color-warning-light);
+  border-color: var(--color-warning);
+  color: #92400e;
+}
+
+.error-message--info {
+  background-color: var(--color-info-light);
+  border-color: var(--color-info);
+  color: #1e40af;
+}
+
+.error-message--success {
+  background-color: var(--color-success-light);
+  border-color: var(--color-success);
+  color: #065f46;
+}
+
+.error-message__content {
+  flex: 1;
+}
+
+.error-message__title {
+  margin: 0 0 var(--spacing-xs) 0;
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-tight);
+}
+
+.error-message__text {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-normal);
+}
+
+.error-message__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.error-message__button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  transition: all var(--transition-fast);
+}
+
+.error-message__button--retry {
+  color: inherit;
+  text-decoration: underline;
+}
+
+.error-message__button--retry:hover {
+  opacity: 0.8;
+}
+
+.error-message__button--dismiss {
+  color: inherit;
+  font-size: var(--font-size-xl);
+  line-height: 1;
+  padding: 0;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.error-message__button--dismiss:hover {
+  background-color: rgba(0, 0, 0, 0.1);
+}

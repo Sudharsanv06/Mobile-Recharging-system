@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { Button, Card, ErrorMessage } from './common';
+import { toast } from '../utils/toast';
 import './Signup.css';
 
 const Signup = ({ onSignup }) => {
@@ -9,7 +11,7 @@ const Signup = ({ onSignup }) => {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
-  const [isEmailVerified, setIsEmailVerified] = useState(false);
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const validateUsername = (username) => {
@@ -56,6 +58,7 @@ const Signup = ({ onSignup }) => {
       return;
     }
 
+    setLoading(true);
     try {
       const response = await fetch('http://localhost:5000/api/v1/auth/register', {
         method: 'POST',
@@ -69,69 +72,135 @@ const Signup = ({ onSignup }) => {
       });
       const data = await response.json();
       if (!response.ok) {
-        setError(data.msg || 'Registration failed');
+        const errorMsg = data.msg || 'Registration failed';
+        setError(errorMsg);
+        toast.error(errorMsg);
         return;
       }
-      localStorage.setItem('token', data.token);
-      onSignup(username.trim());
+      // Save token and user to localStorage
+      const token = data?.data?.token;
+      const user = data?.data?.user;
+      if (token) localStorage.setItem('token', token);
+      if (user) localStorage.setItem('user', JSON.stringify(user));
+      toast.success('Account created successfully! Welcome aboard.');
+      onSignup(user?.name || username.trim());
       navigate('/');
     } catch (err) {
-      setError('Server error. Please try again.');
+      const errorMsg = 'Server error. Please try again.';
+      setError(errorMsg);
+      toast.error(errorMsg);
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
     <div className="signup-page">
-      <div className="signup">
-        <h2>Join Top It Up!</h2>
-        {error && <div className="error-message">{error}</div>}
-        {!isEmailVerified && (
-          <p>Please check your email and verify it before proceeding.</p>
-        )}
-        <form onSubmit={handleSignup} className="signup-form">
-          <input
-            type="text"
-            placeholder="Username (6+ chars with special chars)"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            required
-          />
-          <input
-            type="email"
-            placeholder="Email (@gmail.com only)"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
-          <input
-            type="tel"
-            placeholder="Phone number (10 digits)"
-            value={phone}
-            onChange={(e) => setPhone(e.target.value.replace(/\D/g, '').slice(0, 10))}
-            maxLength="10"
-            pattern="[0-9]{10}"
-            required
-          />
-          <input
-            type="password"
-            placeholder="Password (letters + numbers, 6+ chars)"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
-          <input
-            type="password"
-            placeholder="Confirm your password"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-            required
-          />
-          <button type="submit">Create Account</button>
-        </form>
-        <div className="signup-footer">
-          <p>Already have an account? <Link to="/login" className="login-link">Sign In</Link></p>
+      <Card className="signup-card">
+        <div className="signup-header">
+          <h2>Join Top It Up!</h2>
+          <p className="signup-subtitle">Create your account to get started</p>
         </div>
-      </div>
+        
+        {error && (
+          <ErrorMessage 
+            message={error} 
+            type="error"
+            onDismiss={() => setError('')}
+          />
+        )}
+        
+        <form onSubmit={handleSignup} className="signup-form">
+          <div className="form-group">
+            <label htmlFor="username" className="form-label">Username</label>
+            <input
+              id="username"
+              type="text"
+              className="form-input"
+              placeholder="Username (6+ chars with special chars)"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              disabled={loading}
+              required
+            />
+          </div>
+          
+          <div className="form-group">
+            <label htmlFor="email" className="form-label">Email</label>
+            <input
+              id="email"
+              type="email"
+              className="form-input"
+              placeholder="Email (@gmail.com only)"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              disabled={loading}
+              required
+            />
+          </div>
+          
+          <div className="form-group">
+            <label htmlFor="phone" className="form-label">Phone Number</label>
+            <input
+              id="phone"
+              type="tel"
+              className="form-input"
+              placeholder="Phone number (10 digits)"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value.replace(/\D/g, '').slice(0, 10))}
+              maxLength="10"
+              pattern="[0-9]{10}"
+              disabled={loading}
+              required
+            />
+          </div>
+          
+          <div className="form-group">
+            <label htmlFor="password" className="form-label">Password</label>
+            <input
+              id="password"
+              type="password"
+              className="form-input"
+              placeholder="Password (letters + numbers, 6+ chars)"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              disabled={loading}
+              required
+            />
+          </div>
+          
+          <div className="form-group">
+            <label htmlFor="confirmPassword" className="form-label">Confirm Password</label>
+            <input
+              id="confirmPassword"
+              type="password"
+              className="form-input"
+              placeholder="Confirm your password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              disabled={loading}
+              required
+            />
+          </div>
+          
+          <Button 
+            type="submit" 
+            variant="primary" 
+            size="large" 
+            fullWidth 
+            loading={loading}
+            disabled={loading}
+          >
+            {loading ? 'Creating Account...' : 'Create Account'}
+          </Button>
+        </form>
+        
+        <div className="signup-footer">
+          <p className="signup-footer-text">
+            Already have an account? <Link to="/login" className="link-primary">Sign In</Link>
+          </p>
+        </div>
+      </Card>
     </div>
   );
 };

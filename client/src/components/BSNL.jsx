@@ -18,11 +18,16 @@ const BSNL = ({ isAuthenticated, currentUser, onRechargeInitiate }) => {
   }, [isAuthenticated, navigate]);
 
   useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  }, []);
+
+  useEffect(() => {
     const fetchOperator = async () => {
       try {
         const response = await fetch('http://localhost:5000/api/v1/operators');
-        const operators = await response.json();
-        const bsnlOperator = operators.find(op => op.name === 'BSNL');
+        const resJson = await response.json();
+        const operators = resJson?.data || resJson;
+        const bsnlOperator = Array.isArray(operators) ? operators.find(op => op.name === 'BSNL') : null;
         if (bsnlOperator) {
           setOperator(bsnlOperator);
         }

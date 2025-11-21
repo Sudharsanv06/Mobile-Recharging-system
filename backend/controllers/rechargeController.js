@@ -6,34 +6,44 @@ const sendSMS = require('../utils/sendSMS');
 // Create a new recharge
 exports.createRecharge = async (req, res) => {
   try {
-    const { operatorId, mobileNumber, planId } = req.body;
+    const { operatorId, mobileNumber, planId, amount: bodyAmount } = req.body;
     const userId = req.user.id;
 
     // Get user
     const user = await User.findById(userId);
     if (!user) {
-      return res.status(404).json({ msg: 'User not found' });
+      return res.status(404).json({ success: false, message: 'User not found' });
     }
 
-    // Get operator and plan
-    const operator = await Operator.findById(operatorId);
-    if (!operator) {
-      return res.status(404).json({ msg: 'Operator not found' });
+    // Get operator if provided
+    let operator = null;
+    if (operatorId) {
+      operator = await Operator.findById(operatorId);
+      if (!operator) {
+        return res.status(404).json({ success: false, message: 'Operator not found' });
+      }
     }
 
-    const plan = operator.plans.id(planId);
-    if (!plan) {
-      return res.status(404).json({ msg: 'Plan not found' });
+    // Determine plan: prefer planId from operator, otherwise fall back to body amount
+    let plan = null;
+    let amount = null;
+    if (planId && operator) {
+      plan = operator.plans.id(planId);
+      if (!plan) {
+        return res.status(404).json({ success: false, message: 'Plan not found' });
+      }
+      amount = plan.amount;
+    } else if (bodyAmount) {
+      // Fallback plan object for amount-only requests
+      amount = Number(bodyAmount);
+      plan = {
+        amount,
+        validity: '',
+        description: 'Custom top-up',
+      };
+    } else {
+      return res.status(400).json({ success: false, message: 'Missing planId or amount' });
     }
-
-    // Check user balance
-    // if (user.balance < plan.amount) {
-    //   return res.status(400).json({ msg: 'Insufficient balance' });
-    // }
-
-    // Deduct amount from user balance
-    // user.balance -= plan.amount;
-    // await user.save();
 
     // Generate transaction ID
     const transactionId = `TXN${Date.now()}${Math.floor(Math.random() * 1000)}`;
@@ -41,28 +51,28 @@ exports.createRecharge = async (req, res) => {
     // Create recharge
     const recharge = new Recharge({
       user: userId,
-      operator: operatorId,
+      operator: operatorId || null,
       mobileNumber,
       plan,
-      amount: plan.amount,
+      amount,
       transactionId,
       status: 'success',
     });
 
     await recharge.save();
 
-    // Send confirmation SMS to user
-    const userMessage = `Your recharge of ₹${plan.amount} for ${mobileNumber} was successful. Transaction ID: ${transactionId}`;
+    // Send confirmation SMS to user (best-effort)
+    const userMessage = `Your recharge of ₹${amount} for ${mobileNumber} was successful. Transaction ID: ${transactionId}`;
     await sendSMS(user.phone, userMessage);
 
     // Send confirmation SMS to recharged number
-    const rechargeMessage = `Your mobile number ${mobileNumber} has been recharged with ₹${plan.amount}. Plan: ${plan.description}. Transaction ID: ${transactionId}. Thank you for using Top It Up!`;
+    const rechargeMessage = `Your mobile number ${mobileNumber} has been recharged with ₹${amount}. Plan: ${plan.description || ''}. Transaction ID: ${transactionId}. Thank you for using Top It Up!`;
     await sendSMS(mobileNumber, rechargeMessage);
 
-    res.json(recharge);
+    return res.status(200).json({ success: true, data: recharge });
   } catch (err) {
-    console.error(err.message);
-    res.status(500).send('Server error');
+    console.error('createRecharge error:', err);
+    return res.status(500).json({ success: false, message: 'Server error' });
   }
 };
 

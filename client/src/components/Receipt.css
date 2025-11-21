@@ -1,0 +1,5 @@
+.receipt-page{display:flex;justify-content:center;align-items:flex-start;padding:40px}
+.receipt-card{max-width:720px;background:#fff;padding:24px;border-radius:8px;box-shadow:0 6px 20px rgba(0,0,0,0.08)}
+.receipt-row{margin:10px 0}
+.receipt-actions{display:flex;gap:12px;margin-top:18px}
+.receipt-actions button{padding:8px 12px;border-radius:6px;border:1px solid #ddd;background:#f6f6f6}

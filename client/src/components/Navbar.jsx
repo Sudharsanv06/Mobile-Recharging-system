@@ -36,7 +36,7 @@ const Navbar = ({ isAuthenticated, currentUser, onLogout }) => {
 
   const handleSearch = () => {
     if (searchValue.trim()) {
-      console.log('Searching for:', searchValue);
+      // TODO: Implement search functionality
       setIsSearchOpen(false);
       setSearchValue('');
     }
@@ -94,18 +94,12 @@ const Navbar = ({ isAuthenticated, currentUser, onLogout }) => {
             {isAuthenticated ? (
               <>
                 <li>
-                  <Link to="/profile" className="nav-link" onClick={handleLinkClick}>
-                    Profile
+                  <Link to="/profile" className="nav-link profile-link" onClick={handleLinkClick}>
+                    <div className="profile-avatar">
+                      {currentUser?.charAt(0).toUpperCase()}
+                    </div>
+                    <span className="profile-name-text">{currentUser}</span>
                   </Link>
-                </li>
-                <li>
-                  <button className="logout-btn">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                      <path d="M20 21V19C20 17.9391 19.5786 16.9217 18.8284 16.1716C18.0783 15.4214 17.0609 15 16 15H8C6.93913 15 5.92172 15.4214 5.17157 16.1716C4.42143 16.9217 4 17.9391 4 19V21" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                      <circle cx="12" cy="7" r="4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
-                    {currentUser}
-                  </button>
                 </li>
                 <li>
                   <button className="logout-btn" onClick={handleLogout}>
@@ -114,7 +108,7 @@ const Navbar = ({ isAuthenticated, currentUser, onLogout }) => {
                       <polyline points="16,17 21,12 16,7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                       <line x1="21" y1="12" x2="9" y2="12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
-                    Logout
+                    <span className="logout-text">Logout</span>
                   </button>
                 </li>
               </>

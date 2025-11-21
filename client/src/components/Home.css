@@ -1,23 +1,25 @@
+@import '../styles/variables.css';
+
 .home {
-  margin-top: 80px;
+  margin-top: var(--header-height);
   width: 100%;
-  background-color: #f5f5f5;
+  background-color: var(--color-bg-secondary);
 }
 
 .container {
   width: 100%;
-  max-width: 1200px;
+  max-width: var(--container-max-width);
   margin: 0 auto;
-  padding: 0 20px;
+  padding: 0 var(--container-padding);
   box-sizing: border-box;
 }
 
 /* Hero Section */
 .hero {
-  background: #2c2c2c;
+  background: linear-gradient(135deg, var(--color-primary) 0%, #1e40af 100%);
   color: white;
   text-align: center;
-  padding: 100px 20px;
+  padding: var(--spacing-3xl) var(--container-padding);
   position: relative;
 }
 
@@ -28,32 +30,45 @@
 .hero-content {
   position: relative;
   z-index: 2;
+  animation: fadeIn var(--transition-slow);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 .hero-content h1 {
-  font-size: 3rem;
-  font-weight: 600;
-  margin-bottom: 15px;
+  font-size: var(--font-size-4xl);
+  font-weight: var(--font-weight-bold);
+  margin-bottom: var(--spacing-md);
+  color: white;
 }
 
 .hero-content p {
-  font-size: 1.3rem;
+  font-size: var(--font-size-lg);
   max-width: 700px;
   margin: 0 auto;
+  line-height: var(--line-height-relaxed);
+  opacity: 0.95;
 }
 
 /* Carousel Section */
 .carousel-section {
-  padding: 50px 20px;
-  background-color: #ffffff;
+  padding: var(--spacing-3xl) var(--container-padding);
+  background-color: var(--color-bg-primary);
 }
 
 .carousel-section h2 {
-  font-size: 1.8rem;
+  font-size: var(--font-size-3xl);
   text-align: center;
-  margin-bottom: 30px;
-  color: #2c2c2c;
-  font-weight: 600;
+  margin-bottom: var(--spacing-2xl);
+  color: var(--color-text-primary);
+  font-weight: var(--font-weight-bold);
 }
 
 .carousel-container {
@@ -64,19 +79,19 @@
 
 .carousel-wrapper {
   overflow: hidden;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  border: 1px solid #e0e0e0;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  border: 1px solid var(--color-border);
 }
 
 .carousel-track {
   display: flex;
-  transition: transform 0.5s ease-in-out;
+  transition: transform var(--transition-slow);
 }
 
 .carousel-slide {
   min-width: 100%;
-  height: 300px;
+  height: 350px;
 }
 
 .offer-card {
@@ -84,7 +99,7 @@
   position: relative;
   display: flex;
   align-items: center;
-  padding: 30px;
+  padding: var(--spacing-2xl);
   color: white;
   overflow: hidden;
   background-size: cover;
@@ -97,7 +112,7 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(44, 44, 44, 0.7);
+  background: rgba(0, 0, 0, 0.5);
 }
 
 .offer-content {
@@ -107,81 +122,86 @@
 }
 
 .offer-content h3 {
-  font-size: 1.8rem;
-  font-weight: 600;
-  margin-bottom: 10px;
-  line-height: 1.3;
+  font-size: var(--font-size-3xl);
+  font-weight: var(--font-weight-bold);
+  margin-bottom: var(--spacing-md);
+  line-height: var(--line-height-tight);
+  color: white;
 }
 
 .offer-content p {
-  font-size: 1.1rem;
+  font-size: var(--font-size-lg);
   margin: 0;
+  opacity: 0.95;
 }
 
 .carousel-dots {
   display: flex;
   justify-content: center;
-  gap: 8px;
-  margin-top: 20px;
+  gap: var(--spacing-sm);
+  margin-top: var(--spacing-lg);
 }
 
 .dot {
   width: 12px;
   height: 12px;
-  border-radius: 50%;
+  border-radius: var(--radius-full);
   border: none;
-  background: #dee2e6;
+  background: var(--color-border);
   cursor: pointer;
-  transition: background-color 0.3s ease;
+  transition: all var(--transition-base);
 }
 
 .dot.active {
-  background: #6c757d;
+  background: var(--color-primary);
+  transform: scale(1.2);
 }
 
 .dot:hover {
-  background: #adb5bd;
+  background: var(--color-secondary);
 }
 
 /* Operator Features */
 .operator-section {
-  padding: 50px 20px;
-  background-color: #f8f9fa;
+  padding: var(--spacing-3xl) var(--container-padding);
+  background-color: var(--color-bg-secondary);
 }
 
 .operator-section h2 {
-  font-size: 1.8rem;
+  font-size: var(--font-size-3xl);
   text-align: center;
-  margin-bottom: 30px;
-  color: #2c2c2c;
-  font-weight: 600;
+  margin-bottom: var(--spacing-2xl);
+  color: var(--color-text-primary);
+  font-weight: var(--font-weight-bold);
 }
 
 .operator-grid {
   display: flex;
-  gap: 15px;
+  gap: var(--spacing-lg);
   justify-content: center;
   flex-wrap: nowrap;
   overflow-x: auto;
+  padding-bottom: var(--spacing-md);
 }
 
 .operator-card {
-  border-radius: 6px;
-  padding: 20px 15px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-xl) var(--spacing-lg);
+  box-shadow: var(--shadow-md);
   cursor: pointer;
   position: relative;
   overflow: hidden;
   background-size: 80px;
   background-position: top right;
   background-repeat: no-repeat;
-  border: 1px solid #dee2e6;
-  min-height: 180px;
-  width: 220px;
+  border: 2px solid var(--color-border);
+  min-height: 200px;
+  width: 240px;
   display: flex;
   flex-direction: column;
   flex: 0 0 auto;
-  background-color: #ffffff;
+  background-color: var(--color-bg-primary);
+  transition: all var(--transition-base);
 }
 
 /* Individual operator card backgrounds with their logos */
@@ -214,60 +234,64 @@
 }
 
 .operator-card:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  border-color: #adb5bd;
+  box-shadow: var(--shadow-xl);
+  border-color: var(--color-primary);
+  transform: translateY(-4px);
 }
 
 .operator-card h3 {
-  font-size: 1.2rem;
-  color: #2c2c2c;
-  margin-bottom: 10px;
-  font-weight: 600;
+  font-size: var(--font-size-xl);
+  color: var(--color-text-primary);
+  margin-bottom: var(--spacing-md);
+  font-weight: var(--font-weight-bold);
 }
 
 .operator-card ul {
   list-style: disc;
-  padding-left: 16px;
-  color: #495057;
-  margin-bottom: 10px;
-  font-size: 0.85rem;
+  padding-left: var(--spacing-lg);
+  color: var(--color-text-secondary);
+  margin-bottom: var(--spacing-md);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-relaxed);
 }
 
 .operator-card li {
-  margin-bottom: 4px;
+  margin-bottom: var(--spacing-xs);
 }
 
 .click-hint {
   margin-top: auto;
-  padding: 6px 10px;
-  background: #e9ecef;
-  border: 1px solid #6c757d;
-  border-radius: 4px;
-  color: #6c757d;
-  font-size: 0.75rem;
-  font-weight: 500;
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: var(--color-bg-tertiary);
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-md);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
   text-align: center;
+  transition: all var(--transition-base);
 }
 
 .operator-card:hover .click-hint {
-  background: #6c757d;
+  background: var(--color-primary);
   color: white;
+  border-color: var(--color-primary);
 }
 
-/* New Footer Styles */
+/* Footer */
 .footer {
-  background-color: #2c2c2c;
-  padding: 50px 0 20px;
-  color: #ffffff;
-  font-family: 'Arial', sans-serif;
+  background-color: var(--color-text-primary);
+  padding: var(--spacing-3xl) 0 var(--spacing-xl);
+  color: var(--color-text-inverse);
+  font-family: var(--font-family-base);
 }
 
 .footer-content {
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;
-  gap: 40px;
-  margin-bottom: 40px;
+  gap: var(--spacing-2xl);
+  margin-bottom: var(--spacing-2xl);
 }
 
 .footer-column {
@@ -276,10 +300,11 @@
 }
 
 .footer-column h4 {
-  font-size: 1.1rem;
-  margin-bottom: 15px;
-  color: #ffffff;
-  font-weight: 600;
+  font-size: var(--font-size-base);
+  margin-bottom: var(--spacing-md);
+  color: var(--color-text-inverse);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: 0.05em;
 }
 
 .footer-column ul {
@@ -289,53 +314,70 @@
 }
 
 .footer-column ul li {
-  margin-bottom: 12px;
+  margin-bottom: var(--spacing-sm);
 }
 
 .footer-column ul li a {
-  color: #adb5bd;
+  color: var(--color-text-tertiary);
   text-decoration: none;
+  font-size: var(--font-size-sm);
+  transition: color var(--transition-fast);
 }
 
 .footer-column ul li a:hover {
-  color: #ffffff;
+  color: var(--color-text-inverse);
 }
 
 .social-icons {
   display: flex;
-  gap: 15px;
-  margin-top: 20px;
+  gap: var(--spacing-md);
+  margin-top: var(--spacing-lg);
 }
 
 .social-icons a {
-  color: #adb5bd;
-  font-size: 1.1rem;
+  color: var(--color-text-tertiary);
+  font-size: var(--font-size-lg);
+  transition: all var(--transition-base);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-full);
+  background-color: rgba(255, 255, 255, 0.1);
 }
 
 .social-icons a:hover {
-  color: #ffffff;
+  color: var(--color-text-inverse);
+  background-color: var(--color-primary);
+  transform: translateY(-2px);
 }
 
 .copyright {
   text-align: center;
-  padding-top: 20px;
-  border-top: 1px solid #495057;
-  color: #adb5bd;
-  font-size: 0.85rem;
+  padding-top: var(--spacing-lg);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--color-text-tertiary);
+  font-size: var(--font-size-sm);
+}
+
+.copyright p {
+  margin: 0;
 }
 
 /* Responsive Design */
 @media (max-width: 1024px) {
   .operator-grid {
-    gap: 12px;
+    gap: var(--spacing-md);
   }
   
   .operator-card {
-    width: 200px;
-    min-height: 170px;
+    width: 220px;
+    min-height: 190px;
   }
   
-  .operator-card[data-operator="airtel"] {
+  .operator-card[data-operator="airtel"],
+  .operator-card[data-operator="bsnl"] {
     background-size: 70px;
   }
   
@@ -346,23 +388,30 @@
   .operator-card[data-operator="vi"] {
     background-size: 45px;
   }
-  
-  .operator-card[data-operator="bsnl"] {
-    background-size: 60px;
-  }
 }
 
 @media (max-width: 768px) {
   .hero {
-    padding: 80px 20px;
+    padding: var(--spacing-2xl) var(--container-padding);
   }
   
   .hero-content h1 {
-    font-size: 2.5rem;
+    font-size: var(--font-size-3xl);
   }
   
   .hero-content p {
-    font-size: 1.2rem;
+    font-size: var(--font-size-base);
+  }
+  
+  .carousel-section,
+  .operator-section {
+    padding: var(--spacing-2xl) var(--container-padding);
+  }
+  
+  .carousel-section h2,
+  .operator-section h2 {
+    font-size: var(--font-size-2xl);
+    margin-bottom: var(--spacing-xl);
   }
   
   .carousel-slide {
@@ -370,73 +419,85 @@
   }
   
   .offer-card {
-    padding: 30px 20px;
+    padding: var(--spacing-xl);
   }
   
   .offer-content h3 {
-    font-size: 1.8rem;
+    font-size: var(--font-size-2xl);
   }
   
   .offer-content p {
-    font-size: 1.1rem;
+    font-size: var(--font-size-base);
   }
   
   .operator-grid {
-    gap: 15px;
-    padding: 0 10px;
+    gap: var(--spacing-md);
+    padding: 0 var(--spacing-sm);
   }
   
   .operator-card {
-    width: 190px;
-    min-height: 160px;
+    width: 200px;
+    min-height: 180px;
   }
   
-  .operator-card[data-operator="airtel"] {
+  .operator-card[data-operator="airtel"],
+  .operator-card[data-operator="bsnl"] {
     background-size: 60px;
-    background-position: calc(100% - 8px) 8px;
+    background-position: calc(100% - var(--spacing-sm)) var(--spacing-sm);
   }
   
   .operator-card[data-operator="jio"] {
     background-size: 45px;
-    background-position: calc(100% - 10px) 10px;
+    background-position: calc(100% - var(--spacing-md)) var(--spacing-md);
   }
   
   .operator-card[data-operator="vi"] {
     background-size: 40px;
-    background-position: calc(100% - 10px) 10px;
-  }
-  
-  .operator-card[data-operator="bsnl"] {
-    background-size: 50px;
-    background-position: calc(100% - 8px) 8px;
+    background-position: calc(100% - var(--spacing-md)) var(--spacing-md);
   }
   
   .footer-content {
     flex-direction: column;
-    gap: 30px;
+    gap: var(--spacing-xl);
   }
   
   .footer-column {
     min-width: 100%;
   }
+  
+  .social-icons {
+    justify-content: center;
+  }
 }
 
 @media (max-width: 480px) {
   .hero-content h1 {
-    font-size: 2rem;
+    font-size: var(--font-size-2xl);
   }
   
   .hero-content p {
-    font-size: 1rem;
+    font-size: var(--font-size-sm);
+  }
+  
+  .carousel-slide {
+    height: 250px;
   }
   
   .offer-card {
-    padding: 20px;
+    padding: var(--spacing-lg);
     text-align: center;
   }
   
   .offer-content {
     max-width: 100%;
+  }
+  
+  .offer-content h3 {
+    font-size: var(--font-size-xl);
+  }
+  
+  .offer-content p {
+    font-size: var(--font-size-sm);
   }
   
   .operator-grid {
@@ -446,11 +507,12 @@
   
   .operator-card {
     width: 100%;
-    max-width: 280px;
-    min-height: 180px;
+    max-width: 320px;
+    min-height: 200px;
   }
   
-  .social-icons {
-    justify-content: center;
+  .carousel-section h2,
+  .operator-section h2 {
+    font-size: var(--font-size-xl);
   }
 }

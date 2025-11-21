@@ -15,6 +15,8 @@ import OperatorsList from './components/OperatorsList';
 import OperatorDetails from './components/OperatorDetails';
 
 import './App.css';
+import Toast from './components/Toast';
+import Receipt from './components/Receipt';
 
 const App = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -49,6 +51,7 @@ const App = () => {
         onLogout={handleLogout} 
       />
       <main className="main-content">
+        <Toast />
         <Routes>
           <Route 
             path="/" 
@@ -141,6 +144,10 @@ const App = () => {
               )
             } 
           />
+          <Route
+            path="/receipt"
+            element={<Receipt />}
+          />
           <Route 
             path="/about" 
             element={<About />}
@@ -150,7 +157,7 @@ const App = () => {
             element={<OperatorsList />}
           />
           <Route
-            path="/operators/:id"
+            path="/operators/:operatorId"
             element={<OperatorDetails />}
           />
         </Routes>

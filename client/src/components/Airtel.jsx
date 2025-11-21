@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Button, Card, LoadingSpinner, ErrorMessage } from './common';
+import { toast } from '../utils/toast';
 import './Airtel.css';
 
 const Airtel = ({ isAuthenticated, currentUser, onRechargeInitiate }) => {
@@ -8,6 +10,7 @@ const Airtel = ({ isAuthenticated, currentUser, onRechargeInitiate }) => {
   const [selectedCategory, setSelectedCategory] = useState('recommended');
   const [operator, setOperator] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -17,16 +20,30 @@ const Airtel = ({ isAuthenticated, currentUser, onRechargeInitiate }) => {
   }, [isAuthenticated, navigate]);
 
   useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  }, []);
+
+  useEffect(() => {
     const fetchOperator = async () => {
+      setLoading(true);
+      setError('');
       try {
         const response = await fetch('http://localhost:5000/api/v1/operators');
-        const operators = await response.json();
-        const airtelOperator = operators.find(op => op.name === 'Airtel');
+        if (!response.ok) {
+          throw new Error('Failed to fetch operators');
+        }
+        const resJson = await response.json();
+        const operators = resJson?.data || resJson;
+        const airtelOperator = Array.isArray(operators) ? operators.find(op => op.name === 'Airtel') : null;
         if (airtelOperator) {
           setOperator(airtelOperator);
+        } else {
+          setError('Airtel operator data not found');
         }
       } catch (error) {
         console.error('Error fetching operator:', error);
+        setError('Failed to load Airtel plans. Please try again.');
+        toast.error('Failed to load plans');
       } finally {
         setLoading(false);
       }
@@ -94,7 +111,12 @@ const Airtel = ({ isAuthenticated, currentUser, onRechargeInitiate }) => {
 
   const handleRecharge = (pack) => {
     if (!mobileNumber) {
-      alert('Please enter mobile number');
+      toast.warning('Please enter mobile number');
+      return;
+    }
+    
+    if (mobileNumber.length !== 10) {
+      toast.warning('Please enter a valid 10-digit mobile number');
       return;
     }
     
@@ -122,15 +144,22 @@ const Airtel = ({ isAuthenticated, currentUser, onRechargeInitiate }) => {
   if (loading) {
     return (
       <div className="airtel-page">
-        <div className="loading">Loading Airtel plans...</div>
+        <LoadingSpinner fullscreen text="Loading Airtel plans..." />
       </div>
     );
   }
 
-  if (!operator) {
+  if (error || !operator) {
     return (
       <div className="airtel-page">
-        <div className="error">Error loading operator data</div>
+        <div className="error-container">
+          <ErrorMessage 
+            title="Unable to Load Plans"
+            message={error || 'Operator data not available'}
+            type="error"
+            onRetry={() => window.location.reload()}
+          />
+        </div>
       </div>
     );
   }
@@ -223,21 +252,32 @@ const Airtel = ({ isAuthenticated, currentUser, onRechargeInitiate }) => {
           </div>
 
           <div className="packs-grid">
-            {filteredPacks.map((pack, index) => (
-              <div key={index} className="pack-card">
-                <div className="pack-amount">₹{pack.amount}</div>
-                <div className="pack-details">
-                  <div className="pack-validity">Validity: {pack.validity}</div>
-                  <div className="pack-data">Data: {pack.data}</div>
-                  <div className="pack-calls">Calls: {pack.calls}</div>
-                  <div className="pack-sms">SMS: {pack.sms}</div>
-                </div>
-                <div className="pack-description">{pack.description}</div>
-                <button className="recharge-btn" onClick={() => handleRecharge(pack)}>
-                  Recharge Now
-                </button>
+            {filteredPacks.length === 0 ? (
+              <div className="no-results">
+                <p>No plans found matching your search.</p>
               </div>
-            ))}
+            ) : (
+              filteredPacks.map((pack, index) => (
+                <Card key={index} className="pack-card" variant="elevated">
+                  <div className="pack-amount">₹{pack.amount}</div>
+                  <div className="pack-details">
+                    <div className="pack-validity">Validity: {pack.validity}</div>
+                    <div className="pack-data">Data: {pack.data}</div>
+                    <div className="pack-calls">Calls: {pack.calls}</div>
+                    <div className="pack-sms">SMS: {pack.sms}</div>
+                  </div>
+                  <div className="pack-description">{pack.description}</div>
+                  <Button 
+                    variant="primary" 
+                    fullWidth
+                    onClick={() => handleRecharge(pack)}
+                    disabled={!mobileNumber || mobileNumber.length !== 10}
+                  >
+                    Recharge Now
+                  </Button>
+                </Card>
+              ))
+            )}
           </div>
         </div>
       </div>
