@@ -7,6 +7,8 @@ const BSNL = ({ isAuthenticated, currentUser, onRechargeInitiate }) => {
   const [mobileNumber, setMobileNumber] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('recommended');
+  const [operator, setOperator] = useState(null);
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -15,72 +17,81 @@ const BSNL = ({ isAuthenticated, currentUser, onRechargeInitiate }) => {
     }
   }, [isAuthenticated, navigate]);
 
-  const rechargePacks = {
-    recommended: [
-      { amount: 98, validity: '25 days', data: '2GB/day', calls: 'Unlimited', sms: '100/day', description: 'Most affordable pack' },
-      { amount: 187, validity: '30 days', data: '2GB/day', calls: 'Unlimited', sms: '100/day', description: 'Best value government network' },
-      { amount: 397, validity: '60 days', data: '2GB/day', calls: 'Unlimited', sms: '100/day', description: 'Extended validity offer' }
-    ],
-    unlimited: [
-      { amount: 97, validity: '22 days', data: '1.5GB/day', calls: 'Unlimited', sms: '100/day', description: 'Basic unlimited pack' },
-      { amount: 153, validity: '30 days', data: '1GB/day', calls: 'Unlimited', sms: '100/day', description: 'Government backed reliability' },
-      { amount: 297, validity: '45 days', data: '1.5GB/day', calls: 'Unlimited', sms: '100/day', description: 'Extended unlimited calls' },
-      { amount: 497, validity: '75 days', data: '1.5GB/day', calls: 'Unlimited', sms: '100/day', description: 'Long term unlimited' }
-    ],
-    movie: [
-      { amount: 247, validity: '30 days', data: '2GB/day', calls: 'Unlimited', sms: '100/day', description: 'Entertainment services included' },
-      { amount: 347, validity: '30 days', data: '2.5GB/day', calls: 'Unlimited', sms: '100/day', description: 'Premium content bundle' },
-      { amount: 447, validity: '60 days', data: '2GB/day', calls: 'Unlimited', sms: '100/day', description: 'Complete entertainment package' },
-      { amount: 647, validity: '90 days', data: '2GB/day', calls: 'Unlimited', sms: '100/day', description: 'Extended entertainment plan' }
-    ],
-    cricket: [
-      { amount: 217, validity: '30 days', data: '2GB/day', calls: 'Unlimited', sms: '100/day', description: 'Sports content included' },
-      { amount: 347, validity: '60 days', data: '2.5GB/day', calls: 'Unlimited', sms: '100/day', description: 'Cricket season special' },
-      { amount: 497, validity: '90 days', data: '2GB/day', calls: 'Unlimited', sms: '100/day', description: 'Complete cricket package' }
-    ],
-    monthly: [
-      { amount: 98, validity: '25 days', data: '2GB/day', calls: 'Unlimited', sms: '100/day', description: 'Budget monthly pack' },
-      { amount: 187, validity: '30 days', data: '2GB/day', calls: 'Unlimited', sms: '100/day', description: 'Standard monthly pack' },
-      { amount: 197, validity: '30 days', data: '2GB/day + 4G Ready', calls: 'Unlimited', sms: '100/day', description: 'Premium monthly with 4G' },
-      { amount: 298, validity: '30 days', data: '2.5GB/day + 4G Ready', calls: 'Unlimited', sms: '100/day', description: 'Ultra monthly pack' }
-    ],
-    yearly: [
-      { amount: 1199, validity: '365 days', data: '24GB', calls: '3600 mins', sms: '100/day', description: 'Basic yearly pack' },
-      { amount: 2399, validity: '365 days', data: '2GB/day', calls: 'Unlimited', sms: '100/day', description: 'Premium yearly unlimited' },
-      { amount: 2999, validity: '365 days', data: '2.5GB/day + 4G', calls: 'Unlimited', sms: '100/day', description: 'Ultimate yearly with 4G' }
-    ],
-    roaming: [
-      { amount: 1999, validity: '30 days', data: '50GB', calls: '200 mins', sms: '100', description: 'International roaming - SAARC' },
-      { amount: 3999, validity: '30 days', data: '100GB', calls: '300 mins', sms: '150', description: 'International roaming - Global' },
-      { amount: 999, validity: '7 days', data: '15GB', calls: '50 mins', sms: '25', description: 'Short duration roaming' },
-      { amount: 5999, validity: '30 days', data: '200GB', calls: '500 mins', sms: '300', description: 'Premium global roaming' }
-    ],
-    all: [
-      { amount: 97, validity: '22 days', data: '1.5GB/day', calls: 'Unlimited', sms: '100/day', description: 'Basic unlimited pack' },
-      { amount: 98, validity: '25 days', data: '2GB/day', calls: 'Unlimited', sms: '100/day', description: 'Most affordable pack' },
-      { amount: 153, validity: '30 days', data: '1GB/day', calls: 'Unlimited', sms: '100/day', description: 'Government backed reliability' },
-      { amount: 187, validity: '30 days', data: '2GB/day', calls: 'Unlimited', sms: '100/day', description: 'Best value government network' },
-      { amount: 197, validity: '30 days', data: '2GB/day + 4G Ready', calls: 'Unlimited', sms: '100/day', description: 'Premium monthly with 4G' },
-      { amount: 217, validity: '30 days', data: '2GB/day', calls: 'Unlimited', sms: '100/day', description: 'Sports content included' },
-      { amount: 247, validity: '30 days', data: '2GB/day', calls: 'Unlimited', sms: '100/day', description: 'Entertainment services included' },
-      { amount: 297, validity: '45 days', data: '1.5GB/day', calls: 'Unlimited', sms: '100/day', description: 'Extended unlimited calls' },
-      { amount: 298, validity: '30 days', data: '2.5GB/day + 4G Ready', calls: 'Unlimited', sms: '100/day', description: 'Ultra monthly pack' },
-      { amount: 347, validity: '30 days', data: '2.5GB/day', calls: 'Unlimited', sms: '100/day', description: 'Premium content bundle' },
-      { amount: 347, validity: '60 days', data: '2.5GB/day', calls: 'Unlimited', sms: '100/day', description: 'Cricket season special' },
-      { amount: 397, validity: '60 days', data: '2GB/day', calls: 'Unlimited', sms: '100/day', description: 'Extended validity offer' },
-      { amount: 447, validity: '60 days', data: '2GB/day', calls: 'Unlimited', sms: '100/day', description: 'Complete entertainment package' },
-      { amount: 497, validity: '75 days', data: '1.5GB/day', calls: 'Unlimited', sms: '100/day', description: 'Long term unlimited' },
-      { amount: 497, validity: '90 days', data: '2GB/day', calls: 'Unlimited', sms: '100/day', description: 'Complete cricket package' },
-      { amount: 647, validity: '90 days', data: '2GB/day', calls: 'Unlimited', sms: '100/day', description: 'Extended entertainment plan' },
-      { amount: 999, validity: '7 days', data: '15GB', calls: '50 mins', sms: '25', description: 'Short duration roaming' },
-      { amount: 1199, validity: '365 days', data: '24GB', calls: '3600 mins', sms: '100/day', description: 'Basic yearly pack' },
-      { amount: 1999, validity: '30 days', data: '50GB', calls: '200 mins', sms: '100', description: 'International roaming - SAARC' },
-      { amount: 2399, validity: '365 days', data: '2GB/day', calls: 'Unlimited', sms: '100/day', description: 'Premium yearly unlimited' },
-      { amount: 2999, validity: '365 days', data: '2.5GB/day + 4G', calls: 'Unlimited', sms: '100/day', description: 'Ultimate yearly with 4G' },
-      { amount: 3999, validity: '30 days', data: '100GB', calls: '300 mins', sms: '150', description: 'International roaming - Global' },
-      { amount: 5999, validity: '30 days', data: '200GB', calls: '500 mins', sms: '300', description: 'Premium global roaming' }
-    ]
+  useEffect(() => {
+    const fetchOperator = async () => {
+      try {
+        const response = await fetch('http://localhost:5000/api/v1/operators');
+        const operators = await response.json();
+        const bsnlOperator = operators.find(op => op.name === 'BSNL');
+        if (bsnlOperator) {
+          setOperator(bsnlOperator);
+        }
+      } catch (error) {
+        console.error('Error fetching operator:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchOperator();
+  }, []);
+
+  // Categorize plans based on amount ranges
+  const categorizePlans = (plans) => {
+    if (!plans) return {};
+    
+    const categorized = {
+      recommended: [],
+      unlimited: [],
+      movie: [],
+      cricket: [],
+      monthly: [],
+      yearly: [],
+      roaming: [],
+      all: plans
+    };
+
+    plans.forEach(plan => {
+      // Recommended plans (most popular amounts)
+      if ([98, 187, 397].includes(plan.amount)) {
+        categorized.recommended.push(plan);
+      }
+      
+      // Unlimited plans (focus on calls)
+      if ([97, 153, 297, 497].includes(plan.amount)) {
+        categorized.unlimited.push(plan);
+      }
+      
+      // Movie plans (entertainment focused)
+      if ([247, 347, 447, 647].includes(plan.amount)) {
+        categorized.movie.push(plan);
+      }
+      
+      // Cricket plans (sports focused)
+      if ([217, 347, 497].includes(plan.amount)) {
+        categorized.cricket.push(plan);
+      }
+      
+      // Monthly plans (standard monthly)
+      if ([98, 187, 197, 298].includes(plan.amount)) {
+        categorized.monthly.push(plan);
+      }
+      
+      // Yearly plans (long validity)
+      if ([1199, 2399, 2999].includes(plan.amount)) {
+        categorized.yearly.push(plan);
+      }
+      
+      // Roaming plans (international)
+      if ([1999, 3999, 999, 5999].includes(plan.amount)) {
+        categorized.roaming.push(plan);
+      }
+    });
+
+    return categorized;
   };
+
+  const rechargePacks = operator ? categorizePlans(operator.plans) : {};
 
   const handleRecharge = (pack) => {
     if (!mobileNumber) {
@@ -91,19 +102,39 @@ const BSNL = ({ isAuthenticated, currentUser, onRechargeInitiate }) => {
     const rechargeDetails = {
       ...pack,
       mobileNumber: mobileNumber,
-      operator: 'BSNL'
+      operator: 'BSNL',
+      operatorId: operator._id,
+      planId: pack._id
     };
     
     onRechargeInitiate(rechargeDetails);
     navigate('/payment', { state: rechargeDetails });
   };
 
-  const filteredPacks = rechargePacks[selectedCategory].filter(pack =>
+  const filteredPacks = rechargePacks[selectedCategory] ? rechargePacks[selectedCategory].filter(pack =>
     pack.amount.toString().includes(searchQuery) ||
     pack.description.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  ) : [];
 
-  if (!isAuthenticated) return null;
+  if (!isAuthenticated) {
+    return null;
+  }
+
+  if (loading) {
+    return (
+      <div className="bsnl-page">
+        <div className="loading">Loading BSNL plans...</div>
+      </div>
+    );
+  }
+
+  if (!operator) {
+    return (
+      <div className="bsnl-page">
+        <div className="error">Error loading operator data</div>
+      </div>
+    );
+  }
 
   return (
     <div className="bsnl-page">

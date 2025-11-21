@@ -51,9 +51,13 @@ exports.createRecharge = async (req, res) => {
 
     await recharge.save();
 
-    // Send confirmation SMS
-    const message = `Your recharge of ₹${plan.amount} for ${mobileNumber} was successful. Transaction ID: ${transactionId}`;
-    await sendSMS(user.phone, message);
+    // Send confirmation SMS to user
+    const userMessage = `Your recharge of ₹${plan.amount} for ${mobileNumber} was successful. Transaction ID: ${transactionId}`;
+    await sendSMS(user.phone, userMessage);
+
+    // Send confirmation SMS to recharged number
+    const rechargeMessage = `Your mobile number ${mobileNumber} has been recharged with ₹${plan.amount}. Plan: ${plan.description}. Transaction ID: ${transactionId}. Thank you for using Top It Up!`;
+    await sendSMS(mobileNumber, rechargeMessage);
 
     res.json(recharge);
   } catch (err) {

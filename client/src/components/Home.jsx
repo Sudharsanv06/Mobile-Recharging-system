@@ -116,6 +116,15 @@ const Home = ({ isAuthenticated, currentUser }) => {
                 ))}
               </div>
             </div>
+            <div className="carousel-dots">
+              {offers.map((_, index) => (
+                <button
+                  key={index}
+                  className={`dot ${index === currentSlide ? 'active' : ''}`}
+                  onClick={() => setCurrentSlide(index)}
+                />
+              ))}
+            </div>
           </div>
         </div>
       </section>

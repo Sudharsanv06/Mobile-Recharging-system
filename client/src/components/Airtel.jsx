@@ -6,6 +6,8 @@ const Airtel = ({ isAuthenticated, currentUser, onRechargeInitiate }) => {
   const [mobileNumber, setMobileNumber] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('recommended');
+  const [operator, setOperator] = useState(null);
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -14,69 +16,81 @@ const Airtel = ({ isAuthenticated, currentUser, onRechargeInitiate }) => {
     }
   }, [isAuthenticated, navigate]);
 
-  const rechargePacks = {
-    recommended: [
-      { amount: 199, validity: '28 days', data: '2GB/day', calls: 'Unlimited', sms: '100/day', description: 'Popular choice for daily users' },
-      { amount: 399, validity: '56 days', data: '2.5GB/day', calls: 'Unlimited', sms: '100/day', description: 'Great value for 2 months' },
-      { amount: 599, validity: '84 days', data: '2GB/day', calls: 'Unlimited', sms: '100/day', description: 'Long validity pack' },
-      { amount: 149, validity: '24 days', data: '1.5GB/day', calls: 'Unlimited', sms: '100/day', description: 'Budget friendly option' }
-    ],
-    unlimited: [
-      { amount: 179, validity: '28 days', data: '2GB/day', calls: 'Unlimited', sms: '100/day', description: 'Basic unlimited pack' },
-      { amount: 265, validity: '28 days', data: '1.5GB/day', calls: 'Unlimited', sms: '100/day', description: 'Light data users' },
-      { amount: 549, validity: '56 days', data: '2GB/day', calls: 'Unlimited', sms: '100/day', description: 'Double validity' },
-      { amount: 719, validity: '84 days', data: '1.5GB/day', calls: 'Unlimited', sms: '100/day', description: 'Extended unlimited calls' }
-    ],
-    movie: [
-      { amount: 359, validity: '28 days', data: '2.5GB/day', calls: 'Unlimited', sms: '100/day', description: 'Disney+ Hotstar included' },
-      { amount: 499, validity: '28 days', data: '3GB/day', calls: 'Unlimited', sms: '100/day', description: 'Netflix + Amazon Prime' },
-      { amount: 699, validity: '56 days', data: '2.5GB/day', calls: 'Unlimited', sms: '100/day', description: 'All OTT platforms' },
-      { amount: 839, validity: '84 days', data: '2GB/day', calls: 'Unlimited', sms: '100/day', description: 'Premium entertainment bundle' }
-    ],
-    cricket: [
-      { amount: 299, validity: '28 days', data: '2.5GB/day', calls: 'Unlimited', sms: '100/day', description: 'Disney+ Hotstar Sports' },
-      { amount: 449, validity: '56 days', data: '2GB/day', calls: 'Unlimited', sms: '100/day', description: 'Complete sports package' },
-      { amount: 599, validity: '84 days', data: '2GB/day', calls: 'Unlimited', sms: '100/day', description: 'Full cricket season access' },
-      { amount: 199, validity: '28 days', data: '1.5GB/day', calls: 'Unlimited', sms: '100/day', description: 'Basic sports pack' }
-    ],
-    monthly: [
-      { amount: 199, validity: '28 days', data: '2GB/day', calls: 'Unlimited', sms: '100/day', description: 'Standard monthly plan' },
-      { amount: 299, validity: '30 days', data: '2.5GB/day', calls: 'Unlimited', sms: '100/day', description: 'Premium monthly plan' },
-      { amount: 399, validity: '30 days', data: '3GB/day', calls: 'Unlimited', sms: '100/day', description: 'High-speed monthly plan' },
-      { amount: 149, validity: '28 days', data: '1.5GB/day', calls: 'Unlimited', sms: '100/day', description: 'Economy monthly plan' }
-    ],
-    yearly: [
-      { amount: 1799, validity: '365 days', data: '2GB/day', calls: 'Unlimited', sms: '100/day', description: 'Full year unlimited plan' },
-      { amount: 2399, validity: '365 days', data: '2.5GB/day', calls: 'Unlimited', sms: '100/day', description: 'Premium yearly plan' },
-      { amount: 2999, validity: '365 days', data: '3GB/day', calls: 'Unlimited', sms: '100/day', description: 'Ultimate yearly plan' },
-      { amount: 1399, validity: '365 days', data: '1.5GB/day', calls: 'Unlimited', sms: '100/day', description: 'Budget yearly plan' }
-    ],
-    roaming: [
-      { amount: 2999, validity: '30 days', data: '100GB', calls: '250 mins', sms: '100', description: 'International roaming - Europe' },
-      { amount: 4999, validity: '30 days', data: '200GB', calls: '500 mins', sms: '200', description: 'International roaming - USA' },
-      { amount: 1499, validity: '7 days', data: '25GB', calls: '100 mins', sms: '50', description: 'Short trip roaming' },
-      { amount: 7999, validity: '60 days', data: '300GB', calls: '1000 mins', sms: '500', description: 'Extended international roaming' }
-    ],
-    all: [
-      { amount: 99, validity: '14 days', data: '1GB/day', calls: 'Unlimited', sms: '100/day', description: 'Starter pack' },
-      { amount: 149, validity: '24 days', data: '1.5GB/day', calls: 'Unlimited', sms: '100/day', description: 'Budget friendly option' },
-      { amount: 179, validity: '28 days', data: '2GB/day', calls: 'Unlimited', sms: '100/day', description: 'Basic unlimited pack' },
-      { amount: 199, validity: '28 days', data: '2GB/day', calls: 'Unlimited', sms: '100/day', description: 'Popular choice for daily users' },
-      { amount: 265, validity: '28 days', data: '1.5GB/day', calls: 'Unlimited', sms: '100/day', description: 'Light data users' },
-      { amount: 299, validity: '28 days', data: '2.5GB/day + Unlimited 5G', calls: 'Unlimited', sms: '100/day', description: '5G unlimited at night' },
-      { amount: 359, validity: '28 days', data: '2.5GB/day', calls: 'Unlimited', sms: '100/day', description: 'Disney+ Hotstar included' },
-      { amount: 399, validity: '56 days', data: '2.5GB/day', calls: 'Unlimited', sms: '100/day', description: 'Great value for 2 months' },
-      { amount: 499, validity: '28 days', data: '3GB/day + Unlimited 5G', calls: 'Unlimited', sms: '100/day', description: 'Premium 5G experience' },
-      { amount: 549, validity: '56 days', data: '2GB/day', calls: 'Unlimited', sms: '100/day', description: 'Double validity' },
-      { amount: 599, validity: '84 days', data: '2GB/day', calls: 'Unlimited', sms: '100/day', description: 'Long validity pack' },
-      { amount: 699, validity: '56 days', data: '2.5GB/day', calls: 'Unlimited', sms: '100/day', description: 'All OTT platforms' },
-      { amount: 719, validity: '56 days', data: '2.5GB/day + Unlimited 5G', calls: 'Unlimited', sms: '100/day', description: 'Extended 5G benefits' },
-      { amount: 1399, validity: '365 days', data: '1.5GB/day', calls: 'Unlimited', sms: '100/day', description: 'Budget yearly plan' },
-      { amount: 1799, validity: '365 days', data: '2GB/day', calls: 'Unlimited', sms: '100/day', description: 'Full year unlimited plan' },
-      { amount: 2399, validity: '365 days', data: '2.5GB/day', calls: 'Unlimited', sms: '100/day', description: 'Premium yearly plan' },
-      { amount: 2999, validity: '30 days', data: '100GB', calls: '250 mins', sms: '100', description: 'International roaming - Europe' }
-    ]
+  useEffect(() => {
+    const fetchOperator = async () => {
+      try {
+        const response = await fetch('http://localhost:5000/api/v1/operators');
+        const operators = await response.json();
+        const airtelOperator = operators.find(op => op.name === 'Airtel');
+        if (airtelOperator) {
+          setOperator(airtelOperator);
+        }
+      } catch (error) {
+        console.error('Error fetching operator:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchOperator();
+  }, []);
+
+  // Categorize plans based on amount ranges
+  const categorizePlans = (plans) => {
+    if (!plans) return {};
+    
+    const categorized = {
+      recommended: [],
+      unlimited: [],
+      movie: [],
+      cricket: [],
+      monthly: [],
+      yearly: [],
+      roaming: [],
+      all: plans
+    };
+
+    plans.forEach(plan => {
+      // Recommended plans (most popular amounts)
+      if ([199, 399, 599, 149].includes(plan.amount)) {
+        categorized.recommended.push(plan);
+      }
+      
+      // Unlimited plans (focus on calls)
+      if ([179, 265, 549, 719].includes(plan.amount)) {
+        categorized.unlimited.push(plan);
+      }
+      
+      // Movie plans (entertainment focused)
+      if ([359, 499, 699, 839].includes(plan.amount)) {
+        categorized.movie.push(plan);
+      }
+      
+      // Cricket plans (sports focused)
+      if ([299, 449, 599, 199].includes(plan.amount)) {
+        categorized.cricket.push(plan);
+      }
+      
+      // Monthly plans (standard monthly)
+      if ([199, 299, 399, 149].includes(plan.amount)) {
+        categorized.monthly.push(plan);
+      }
+      
+      // Yearly plans (long validity)
+      if ([1799, 2399, 2999, 1399].includes(plan.amount)) {
+        categorized.yearly.push(plan);
+      }
+      
+      // Roaming plans (international)
+      if ([2999, 4999, 1499, 7999].includes(plan.amount)) {
+        categorized.roaming.push(plan);
+      }
+    });
+
+    return categorized;
   };
+
+  const rechargePacks = operator ? categorizePlans(operator.plans) : {};
 
   const handleRecharge = (pack) => {
     if (!mobileNumber) {
@@ -87,19 +101,39 @@ const Airtel = ({ isAuthenticated, currentUser, onRechargeInitiate }) => {
     const rechargeDetails = {
       ...pack,
       mobileNumber: mobileNumber,
-      operator: 'Airtel'
+      operator: 'Airtel',
+      operatorId: operator._id,
+      planId: pack._id
     };
     
     onRechargeInitiate(rechargeDetails);
     navigate('/payment', { state: rechargeDetails });
   };
 
-  const filteredPacks = rechargePacks[selectedCategory].filter(pack =>
+  const filteredPacks = rechargePacks[selectedCategory] ? rechargePacks[selectedCategory].filter(pack =>
     pack.amount.toString().includes(searchQuery) ||
     pack.description.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  ) : [];
 
-  if (!isAuthenticated) return null;
+  if (!isAuthenticated) {
+    return null;
+  }
+
+  if (loading) {
+    return (
+      <div className="airtel-page">
+        <div className="loading">Loading Airtel plans...</div>
+      </div>
+    );
+  }
+
+  if (!operator) {
+    return (
+      <div className="airtel-page">
+        <div className="error">Error loading operator data</div>
+      </div>
+    );
+  }
 
   return (
     <div className="airtel-page">

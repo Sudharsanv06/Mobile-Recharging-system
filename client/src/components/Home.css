@@ -1,7 +1,7 @@
 .home {
   margin-top: 80px;
   width: 100%;
-  background-color: #fff;
+  background-color: #f5f5f5;
 }
 
 .container {
@@ -14,20 +14,15 @@
 
 /* Hero Section */
 .hero {
-  background: url('https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80') center/cover no-repeat;
+  background: #2c2c2c;
   color: white;
   text-align: center;
-  padding: 120px 20px;
+  padding: 100px 20px;
   position: relative;
 }
 
 .hero-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.5);
+  display: none;
 }
 
 .hero-content {
@@ -36,31 +31,29 @@
 }
 
 .hero-content h1 {
-  font-size: 3.5rem;
-  font-weight: bold;
+  font-size: 3rem;
+  font-weight: 600;
   margin-bottom: 15px;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
 }
 
 .hero-content p {
-  font-size: 1.5rem;
-  opacity: 0.9;
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
-  max-width: 800px;
+  font-size: 1.3rem;
+  max-width: 700px;
   margin: 0 auto;
 }
 
 /* Carousel Section */
 .carousel-section {
-  padding: 60px 20px;
-  background-color: #f8f9fa;
+  padding: 50px 20px;
+  background-color: #ffffff;
 }
 
 .carousel-section h2 {
-  font-size: 2rem;
+  font-size: 1.8rem;
   text-align: center;
-  margin-bottom: 40px;
-  color: #333;
+  margin-bottom: 30px;
+  color: #2c2c2c;
+  font-weight: 600;
 }
 
 .carousel-container {
@@ -71,8 +64,9 @@
 
 .carousel-wrapper {
   overflow: hidden;
-  border-radius: 16px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e0e0e0;
 }
 
 .carousel-track {
@@ -82,7 +76,7 @@
 
 .carousel-slide {
   min-width: 100%;
-  height: 400px;
+  height: 300px;
 }
 
 .offer-card {
@@ -90,7 +84,7 @@
   position: relative;
   display: flex;
   align-items: center;
-  padding: 40px;
+  padding: 30px;
   color: white;
   overflow: hidden;
   background-size: cover;
@@ -103,7 +97,7 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.4);
+  background: rgba(44, 44, 44, 0.7);
 }
 
 .offer-content {
@@ -113,31 +107,54 @@
 }
 
 .offer-content h3 {
-  font-size: 2.2rem;
-  font-weight: bold;
-  margin-bottom: 15px;
-  line-height: 1.2;
-  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.8);
+  font-size: 1.8rem;
+  font-weight: 600;
+  margin-bottom: 10px;
+  line-height: 1.3;
 }
 
 .offer-content p {
-  font-size: 1.3rem;
-  opacity: 0.9;
+  font-size: 1.1rem;
   margin: 0;
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+}
+
+.carousel-dots {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 20px;
+}
+
+.dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: none;
+  background: #dee2e6;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.dot.active {
+  background: #6c757d;
+}
+
+.dot:hover {
+  background: #adb5bd;
 }
 
 /* Operator Features */
 .operator-section {
-  padding: 60px 20px;
-  background-color: #fff;
+  padding: 50px 20px;
+  background-color: #f8f9fa;
 }
 
 .operator-section h2 {
-  font-size: 2rem;
+  font-size: 1.8rem;
   text-align: center;
-  margin-bottom: 40px;
-  color: #333;
+  margin-bottom: 30px;
+  color: #2c2c2c;
+  font-weight: 600;
 }
 
 .operator-grid {
@@ -149,23 +166,22 @@
 }
 
 .operator-card {
-  border-radius: 8px;
-  padding: 15px 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  border-radius: 6px;
+  padding: 20px 15px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   cursor: pointer;
   position: relative;
   overflow: hidden;
-  background-size: 100px;
+  background-size: 80px;
   background-position: top right;
   background-repeat: no-repeat;
-  border: 1px solid #e0e0e0;
+  border: 1px solid #dee2e6;
   min-height: 180px;
   width: 220px;
   display: flex;
   flex-direction: column;
   flex: 0 0 auto;
-  background-color: #fff;
+  background-color: #ffffff;
 }
 
 /* Individual operator card backgrounds with their logos */
@@ -194,74 +210,55 @@
 }
 
 .operator-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
-  z-index: 1;
+  display: none;
 }
 
 .operator-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-}
-
-.operator-card:hover .operator-overlay {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.1) 100%);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border-color: #adb5bd;
 }
 
 .operator-card h3 {
-  font-size: 1.3rem;
-  color: #333;
-  margin-bottom: 12px;
-  position: relative;
-  z-index: 2;
+  font-size: 1.2rem;
+  color: #2c2c2c;
+  margin-bottom: 10px;
   font-weight: 600;
 }
 
 .operator-card ul {
   list-style: disc;
-  padding-left: 18px;
-  color: #555;
-  margin-bottom: 12px;
-  position: relative;
-  z-index: 2;
-  font-size: 0.9rem;
+  padding-left: 16px;
+  color: #495057;
+  margin-bottom: 10px;
+  font-size: 0.85rem;
 }
 
 .operator-card li {
-  margin-bottom: 6px;
-  position: relative;
-  z-index: 2;
+  margin-bottom: 4px;
 }
 
 .click-hint {
   margin-top: auto;
   padding: 6px 10px;
-  background: #f0f8ff;
-  border: 1px solid #667eea;
+  background: #e9ecef;
+  border: 1px solid #6c757d;
   border-radius: 4px;
-  color: #667eea;
-  font-size: 0.8rem;
-  font-weight: 600;
+  color: #6c757d;
+  font-size: 0.75rem;
+  font-weight: 500;
   text-align: center;
-  transition: all 0.3s ease;
-  position: relative;
-  z-index: 2;
 }
 
 .operator-card:hover .click-hint {
-  background: #667eea;
+  background: #6c757d;
   color: white;
 }
 
 /* New Footer Styles */
 .footer {
-  background-color: #f8f8f8;
-  padding: 60px 0 20px;
-  color: #333;
+  background-color: #2c2c2c;
+  padding: 50px 0 20px;
+  color: #ffffff;
   font-family: 'Arial', sans-serif;
 }
 
@@ -279,9 +276,9 @@
 }
 
 .footer-column h4 {
-  font-size: 1.2rem;
-  margin-bottom: 20px;
-  color: #222;
+  font-size: 1.1rem;
+  margin-bottom: 15px;
+  color: #ffffff;
   font-weight: 600;
 }
 
@@ -296,13 +293,12 @@
 }
 
 .footer-column ul li a {
-  color: #555;
+  color: #adb5bd;
   text-decoration: none;
-  transition: color 0.3s ease;
 }
 
 .footer-column ul li a:hover {
-  color: #667eea;
+  color: #ffffff;
 }
 
 .social-icons {
@@ -312,22 +308,20 @@
 }
 
 .social-icons a {
-  color: #555;
-  font-size: 1.2rem;
-  transition: color 0.3s ease, transform 0.3s ease;
+  color: #adb5bd;
+  font-size: 1.1rem;
 }
 
 .social-icons a:hover {
-  color: #667eea;
-  transform: translateY(-3px);
+  color: #ffffff;
 }
 
 .copyright {
   text-align: center;
   padding-top: 20px;
-  border-top: 1px solid #e0e0e0;
-  color: #777;
-  font-size: 0.9rem;
+  border-top: 1px solid #495057;
+  color: #adb5bd;
+  font-size: 0.85rem;
 }
 
 /* Responsive Design */

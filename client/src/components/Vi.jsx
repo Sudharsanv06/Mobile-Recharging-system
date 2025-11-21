@@ -7,6 +7,8 @@ const Vi = ({ isAuthenticated, currentUser, onRechargeInitiate }) => {
   const [mobileNumber, setMobileNumber] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('recommended');
+  const [operator, setOperator] = useState(null);
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -15,72 +17,81 @@ const Vi = ({ isAuthenticated, currentUser, onRechargeInitiate }) => {
     }
   }, [isAuthenticated, navigate]);
 
-  const rechargePacks = {
-    recommended: [
-      { amount: 179, validity: '28 days', data: '2GB/day', calls: 'Unlimited', sms: '100/day', description: 'Popular everyday pack' },
-      { amount: 359, validity: '28 days', data: '2.5GB/day', calls: 'Unlimited', sms: '100/day', description: 'Premium choice with weekend data rollover' },
-      { amount: 539, validity: '56 days', data: '2GB/day', calls: 'Unlimited', sms: '100/day', description: 'Best value for money' }
-    ],
-    unlimited: [
-      { amount: 199, validity: '30 days', data: '1.5GB/day', calls: 'Unlimited', sms: '100/day', description: 'Basic unlimited pack' },
-      { amount: 249, validity: '28 days', data: '2GB/day', calls: 'Unlimited', sms: '100/day', description: 'Truly unlimited calls' },
-      { amount: 449, validity: '56 days', data: '1.5GB/day', calls: 'Unlimited', sms: '100/day', description: 'Long validity unlimited' },
-      { amount: 719, validity: '84 days', data: '1.5GB/day', calls: 'Unlimited', sms: '100/day', description: 'Extended unlimited calls' }
-    ],
-    movie: [
-      { amount: 299, validity: '28 days', data: '2GB/day', calls: 'Unlimited', sms: '100/day', description: 'Vi Movies & TV included' },
-      { amount: 399, validity: '28 days', data: '2.5GB/day', calls: 'Unlimited', sms: '100/day', description: 'Premium entertainment bundle' },
-      { amount: 599, validity: '56 days', data: '2GB/day', calls: 'Unlimited', sms: '100/day', description: 'Complete entertainment package' },
-      { amount: 899, validity: '84 days', data: '2GB/day', calls: 'Unlimited', sms: '100/day', description: 'Ultimate movie experience' }
-    ],
-    cricket: [
-      { amount: 269, validity: '28 days', data: '2GB/day', calls: 'Unlimited', sms: '100/day', description: 'Vi Sports + Live Cricket' },
-      { amount: 439, validity: '56 days', data: '2.5GB/day', calls: 'Unlimited', sms: '100/day', description: 'Sports bundle with extra data' },
-      { amount: 639, validity: '84 days', data: '2GB/day', calls: 'Unlimited', sms: '100/day', description: 'Complete cricket season pack' }
-    ],
-    monthly: [
-      { amount: 179, validity: '28 days', data: '2GB/day', calls: 'Unlimited', sms: '100/day', description: 'Budget monthly pack' },
-      { amount: 249, validity: '28 days', data: '2GB/day', calls: 'Unlimited', sms: '100/day', description: 'Standard monthly pack' },
-      { amount: 319, validity: '28 days', data: '2.5GB/day + 5G Ready', calls: 'Unlimited', sms: '100/day', description: 'Premium monthly with 5G' },
-      { amount: 479, validity: '28 days', data: '3GB/day + 5G Ready', calls: 'Unlimited', sms: '100/day', description: 'Ultra monthly pack' }
-    ],
-    yearly: [
-      { amount: 1999, validity: '365 days', data: '24GB', calls: '3600 mins', sms: '100/day', description: 'Basic yearly pack' },
-      { amount: 3199, validity: '365 days', data: '2GB/day', calls: 'Unlimited', sms: '100/day', description: 'Premium yearly unlimited' },
-      { amount: 4299, validity: '365 days', data: '2.5GB/day + 5G', calls: 'Unlimited', sms: '100/day', description: 'Ultimate yearly with 5G' }
-    ],
-    roaming: [
-      { amount: 2799, validity: '30 days', data: '75GB', calls: '250 mins', sms: '100', description: 'International roaming - Europe' },
-      { amount: 4899, validity: '30 days', data: '150GB', calls: '500 mins', sms: '200', description: 'International roaming - Americas' },
-      { amount: 1399, validity: '7 days', data: '20GB', calls: '100 mins', sms: '50', description: 'Weekend international trip' },
-      { amount: 7999, validity: '30 days', data: '400GB', calls: '1000 mins', sms: '500', description: 'Premium global roaming' }
-    ],
-    all: [
-      { amount: 179, validity: '28 days', data: '2GB/day', calls: 'Unlimited', sms: '100/day', description: 'Popular everyday pack' },
-      { amount: 199, validity: '30 days', data: '1.5GB/day', calls: 'Unlimited', sms: '100/day', description: 'Basic unlimited pack' },
-      { amount: 249, validity: '28 days', data: '2GB/day', calls: 'Unlimited', sms: '100/day', description: 'Truly unlimited calls' },
-      { amount: 269, validity: '28 days', data: '2GB/day', calls: 'Unlimited', sms: '100/day', description: 'Vi Sports + Live Cricket' },
-      { amount: 299, validity: '28 days', data: '2GB/day', calls: 'Unlimited', sms: '100/day', description: 'Vi Movies & TV included' },
-      { amount: 319, validity: '28 days', data: '2.5GB/day + 5G Ready', calls: 'Unlimited', sms: '100/day', description: 'Premium monthly with 5G' },
-      { amount: 359, validity: '28 days', data: '2.5GB/day', calls: 'Unlimited', sms: '100/day', description: 'Premium choice with weekend data rollover' },
-      { amount: 399, validity: '28 days', data: '2.5GB/day', calls: 'Unlimited', sms: '100/day', description: 'Premium entertainment bundle' },
-      { amount: 439, validity: '56 days', data: '2.5GB/day', calls: 'Unlimited', sms: '100/day', description: 'Sports bundle with extra data' },
-      { amount: 449, validity: '56 days', data: '1.5GB/day', calls: 'Unlimited', sms: '100/day', description: 'Long validity unlimited' },
-      { amount: 479, validity: '28 days', data: '3GB/day + 5G Ready', calls: 'Unlimited', sms: '100/day', description: 'Ultra monthly pack' },
-      { amount: 539, validity: '56 days', data: '2GB/day', calls: 'Unlimited', sms: '100/day', description: 'Best value for money' },
-      { amount: 599, validity: '56 days', data: '2GB/day', calls: 'Unlimited', sms: '100/day', description: 'Complete entertainment package' },
-      { amount: 639, validity: '84 days', data: '2GB/day', calls: 'Unlimited', sms: '100/day', description: 'Complete cricket season pack' },
-      { amount: 719, validity: '84 days', data: '1.5GB/day', calls: 'Unlimited', sms: '100/day', description: 'Extended unlimited calls' },
-      { amount: 899, validity: '84 days', data: '2GB/day', calls: 'Unlimited', sms: '100/day', description: 'Ultimate movie experience' },
-      { amount: 1399, validity: '7 days', data: '20GB', calls: '100 mins', sms: '50', description: 'Weekend international trip' },
-      { amount: 1999, validity: '365 days', data: '24GB', calls: '3600 mins', sms: '100/day', description: 'Basic yearly pack' },
-      { amount: 2799, validity: '30 days', data: '75GB', calls: '250 mins', sms: '100', description: 'International roaming - Europe' },
-      { amount: 3199, validity: '365 days', data: '2GB/day', calls: 'Unlimited', sms: '100/day', description: 'Premium yearly unlimited' },
-      { amount: 4299, validity: '365 days', data: '2.5GB/day + 5G', calls: 'Unlimited', sms: '100/day', description: 'Ultimate yearly with 5G' },
-      { amount: 4899, validity: '30 days', data: '150GB', calls: '500 mins', sms: '200', description: 'International roaming - Americas' },
-      { amount: 7999, validity: '30 days', data: '400GB', calls: '1000 mins', sms: '500', description: 'Premium global roaming' }
-    ]
+  useEffect(() => {
+    const fetchOperator = async () => {
+      try {
+        const response = await fetch('http://localhost:5000/api/v1/operators');
+        const operators = await response.json();
+        const viOperator = operators.find(op => op.name === 'Vi');
+        if (viOperator) {
+          setOperator(viOperator);
+        }
+      } catch (error) {
+        console.error('Error fetching operator:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchOperator();
+  }, []);
+
+  // Categorize plans based on amount ranges
+  const categorizePlans = (plans) => {
+    if (!plans) return {};
+    
+    const categorized = {
+      recommended: [],
+      unlimited: [],
+      movie: [],
+      cricket: [],
+      monthly: [],
+      yearly: [],
+      roaming: [],
+      all: plans
+    };
+
+    plans.forEach(plan => {
+      // Recommended plans (most popular amounts)
+      if ([179, 359, 539].includes(plan.amount)) {
+        categorized.recommended.push(plan);
+      }
+      
+      // Unlimited plans (focus on calls)
+      if ([199, 249, 449, 719].includes(plan.amount)) {
+        categorized.unlimited.push(plan);
+      }
+      
+      // Movie plans (entertainment focused)
+      if ([299, 399, 599, 899].includes(plan.amount)) {
+        categorized.movie.push(plan);
+      }
+      
+      // Cricket plans (sports focused)
+      if ([269, 439, 639].includes(plan.amount)) {
+        categorized.cricket.push(plan);
+      }
+      
+      // Monthly plans (standard monthly)
+      if ([179, 249, 319, 479].includes(plan.amount)) {
+        categorized.monthly.push(plan);
+      }
+      
+      // Yearly plans (long validity)
+      if ([1999, 3199, 4299].includes(plan.amount)) {
+        categorized.yearly.push(plan);
+      }
+      
+      // Roaming plans (international)
+      if ([2799, 4899, 1399, 7999].includes(plan.amount)) {
+        categorized.roaming.push(plan);
+      }
+    });
+
+    return categorized;
   };
+
+  const rechargePacks = operator ? categorizePlans(operator.plans) : {};
 
   const handleRecharge = (pack) => {
     if (!mobileNumber) {
@@ -91,19 +102,39 @@ const Vi = ({ isAuthenticated, currentUser, onRechargeInitiate }) => {
     const rechargeDetails = {
       ...pack,
       mobileNumber: mobileNumber,
-      operator: 'Vi'
+      operator: 'Vi',
+      operatorId: operator._id,
+      planId: pack._id
     };
     
     onRechargeInitiate(rechargeDetails);
     navigate('/payment', { state: rechargeDetails });
   };
 
-  const filteredPacks = rechargePacks[selectedCategory].filter(pack =>
+  const filteredPacks = rechargePacks[selectedCategory] ? rechargePacks[selectedCategory].filter(pack =>
     pack.amount.toString().includes(searchQuery) ||
     pack.description.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  ) : [];
 
-  if (!isAuthenticated) return null;
+  if (!isAuthenticated) {
+    return null;
+  }
+
+  if (loading) {
+    return (
+      <div className="vi-page">
+        <div className="loading">Loading Vi plans...</div>
+      </div>
+    );
+  }
+
+  if (!operator) {
+    return (
+      <div className="vi-page">
+        <div className="error">Error loading operator data</div>
+      </div>
+    );
+  }
 
   return (
     <div className="vi-page">

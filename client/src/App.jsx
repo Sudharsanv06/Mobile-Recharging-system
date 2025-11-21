@@ -11,6 +11,8 @@ import Vi from './components/Vi';
 import BSNL from './components/BSNL';
 import Payment from './components/Payment';
 import About from './components/About';
+import OperatorsList from './components/OperatorsList';
+import OperatorDetails from './components/OperatorDetails';
 
 import './App.css';
 
@@ -142,6 +144,14 @@ const App = () => {
           <Route 
             path="/about" 
             element={<About />}
+          />
+          <Route
+            path="/operators"
+            element={<OperatorsList />}
+          />
+          <Route
+            path="/operators/:id"
+            element={<OperatorDetails />}
           />
         </Routes>
       </main>

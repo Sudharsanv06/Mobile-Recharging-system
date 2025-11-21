@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import './Payment.css';
+import MobileVerification from './MobileVerification';
+import axios from 'axios';
+
 
 const Payment = ({ isAuthenticated, currentUser }) => {
   const navigate = useNavigate();
@@ -39,6 +42,11 @@ const Payment = ({ isAuthenticated, currentUser }) => {
     password: '',
     transactionPassword: ''
   });
+  
+  // Mobile verification states
+  const [showVerification, setShowVerification] = useState(false);
+  const [isMobileVerified, setIsMobileVerified] = useState(false);
+  const [verifiedMobileNumber, setVerifiedMobileNumber] = useState('');
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -112,14 +120,12 @@ const Payment = ({ isAuthenticated, currentUser }) => {
   const handlePaymentSelect = (method) => {
     setSelectedPayment(method.id);
     
-    // Reset all forms
     setShowCardForm(false);
     setShowUPIForm(false);
     setShowNetBankingForm(false);
     setSelectedOtherUPI('');
     setUpiId('');
     
-    // Show relevant form
     if (method.type === 'card') {
       setShowCardForm(true);
     } else if (method.type === 'upi') {
@@ -133,7 +139,6 @@ const Payment = ({ isAuthenticated, currentUser }) => {
 
   const handleCardInputChange = (field, value) => {
     if (field === 'number') {
-      // Format card number with spaces
       const formatted = value
         .replace(/\s+/g, '')
         .replace(/[^0-9]/gi, '')
@@ -141,14 +146,12 @@ const Payment = ({ isAuthenticated, currentUser }) => {
         .trim();
       setCardDetails(prev => ({ ...prev, [field]: formatted }));
     } else if (field === 'expiry') {
-      // Format expiry MM/YY
       const formatted = value
         .replace(/\D/g, '')
         .replace(/(\d{2})(\d)/, '$1/$2')
         .substr(0, 5);
       setCardDetails(prev => ({ ...prev, [field]: formatted }));
     } else if (field === 'cvv') {
-      // Only numbers for CVV
       const formatted = value.replace(/\D/g, '').substr(0, 4);
       setCardDetails(prev => ({ ...prev, [field]: formatted }));
     } else {
@@ -214,10 +217,8 @@ const Payment = ({ isAuthenticated, currentUser }) => {
     setIsProcessing(true);
     
     try {
-      // Simulate payment processing
       await new Promise(resolve => setTimeout(resolve, 3000));
       
-      // Create recharge record in backend
       const token = localStorage.getItem('token');
       const rechargeResponse = await fetch('http://localhost:5000/api/v1/recharges', {
         method: 'POST',
@@ -249,10 +250,18 @@ const Payment = ({ isAuthenticated, currentUser }) => {
 
       const rechargeData = await rechargeResponse.json();
       
-      // Show success message
+      // Send recharge confirmation email
+      await axios.post('http://localhost:5000/api/email/send-confirmation', {
+  email: rechargeDetails.email,
+  rechargeDetails: {
+    ...rechargeDetails,
+    currentUser: currentUser?.name || 'User',
+    transactionId: rechargeData.transactionId
+  }
+});
+
+
       alert(`Payment Successful! ₹${rechargeDetails.amount} recharged for ${rechargeDetails.mobileNumber}. Transaction ID: ${rechargeData.transactionId}`);
-      
-      // Navigate back to operator page or dashboard
       navigate(-1);
     } catch (error) {
       alert('Payment failed. Please try again.');
@@ -265,11 +274,20 @@ const Payment = ({ isAuthenticated, currentUser }) => {
     navigate(-1);
   };
 
+  const handleVerificationComplete = (phoneNumber) => {
+    setIsMobileVerified(true);
+    setVerifiedMobileNumber(phoneNumber);
+    setShowVerification(false);
+  };
+
+  const handleVerificationClose = () => {
+    setShowVerification(false);
+  };
+
   if (!isAuthenticated) return null;
 
   return (
     <div className="payment-page">
-      {/* Header */}
       <div className="payment-header">
         <button className="back-btn" onClick={handleGoBack}>
           ← Back
@@ -279,108 +297,131 @@ const Payment = ({ isAuthenticated, currentUser }) => {
       </div>
 
       <div className="payment-container">
-        {/* Order Summary */}
-        <div className="order-summary">
-          <h2>Order Summary</h2>
-          <div className="summary-card">
-            <div className="operator-info">
-              <div className="operator-logo">
-                {rechargeDetails.operator === 'Airtel' && '📱'}
-                {rechargeDetails.operator === 'Jio' && '🔴'}
-                {rechargeDetails.operator === 'Vi' && '🔵'}
-                {rechargeDetails.operator === 'BSNL' && '🟡'}
+        <div className="payment-content">
+          <div className="order-summary">
+            <h2>📋 Order Summary</h2>
+            <div className="summary-card">
+              <div className="operator-info">
+                <div className="operator-logo">
+                  {rechargeDetails.operator === 'Airtel' && '🔴'}
+                  {rechargeDetails.operator === 'Jio' && '🔵'}
+                  {rechargeDetails.operator === 'BSNL' && '🟠'}
+                  {rechargeDetails.operator === 'Vi' && '🟣'}
+                </div>
+                <div className="operator-details">
+                  <h3>{rechargeDetails.operator}</h3>
+
+                  {/* Replace free-text mobile entry with Select recipient button */}
+                  <div className="mt-2">
+                    <button className="px-3 py-2 border rounded">Select recipient</button>
+                    <div className="text-sm text-gray-600 mt-2">Or choose saved recipient</div>
+                    <div className="mt-2">Current: {rechargeDetails.mobileNumber}</div>
+                  </div>
+                </div>
               </div>
-              <div>
-                <h3>{rechargeDetails.operator} Recharge</h3>
-                <p>+91 {rechargeDetails.mobileNumber}</p>
-                <p>{rechargeDetails.email}</p>
+              
+              <div className="plan-details">
+                <div className="plan-amount">₹{rechargeDetails.amount}</div>
+                <div className="plan-info">
+                  <div className="info-item">
+                    <span className="icon">📅</span>
+                    <span className="label">Validity:</span>
+                    <span className="value">{rechargeDetails.validity}</span>
+                  </div>
+                  <div className="info-item">
+                    <span className="icon">📶</span>
+                    <span className="label">Data:</span>
+                    <span className="value">{rechargeDetails.data}</span>
+                  </div>
+                  <div className="info-item">
+                    <span className="icon">📞</span>
+                    <span className="label">Calls:</span>
+                    <span className="value">{rechargeDetails.calls}</span>
+                  </div>
+                  <div className="info-item">
+                    <span className="icon">💬</span>
+                    <span className="label">SMS:</span>
+                    <span className="value">{rechargeDetails.sms}</span>
+                  </div>
+                </div>
+                
+                {rechargeDetails.offer && (
+                  <div className="offer-badge">
+                    <span className="offer-icon">🎁</span>
+                    <span className="offer-text">{rechargeDetails.offer}</span>
+                  </div>
+                )}
+                
+                {rechargeDetails.cashback && (
+                  <div className="cashback-badge">
+                    <span className="cashback-icon">💰</span>
+                    <span className="cashback-text">Cashback: ₹{rechargeDetails.cashback}</span>
+                  </div>
+                )}
               </div>
-            </div>
-            
-            <div className="plan-details">
-              <div className="detail-row">
-                <span>Plan Amount</span>
-                <span>₹{rechargeDetails.amount}</span>
-              </div>
-              <div className="detail-row">
-                <span>Validity</span>
-                <span>{rechargeDetails.validity}</span>
-              </div>
-              <div className="detail-row">
-                <span>Data</span>
-                <span>{rechargeDetails.data}</span>
-              </div>
-              <div className="detail-row">
-                <span>Calls</span>
-                <span>{rechargeDetails.calls}</span>
-              </div>
-              <div className="detail-row">
-                <span>SMS</span>
-                <span>{rechargeDetails.sms}</span>
-              </div>
-            </div>
-            
-            <div className="total-section">
-              <div className="detail-row total">
-                <span>Total Amount</span>
-                <span>₹{rechargeDetails.amount}</span>
+              
+              <div className="price-breakdown">
+                <div className="breakdown-item">
+                  <span>Plan Amount</span>
+                  <span>₹{rechargeDetails.amount}</span>
+                </div>
+                <div className="breakdown-item">
+                  <span>Processing Fee</span>
+                  <span>₹0</span>
+                </div>
+                {rechargeDetails.cashback && (
+                  <div className="breakdown-item cashback">
+                    <span>Cashback</span>
+                    <span>-₹{rechargeDetails.cashback}</span>
+                  </div>
+                )}
+                <div className="breakdown-total">
+                  <span>Total Amount</span>
+                  <span>₹{rechargeDetails.amount}</span>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-
-        {/* Payment Methods */}
-        <div className="payment-methods">
-          <h2>Choose Payment Method</h2>
           
-          {/* Popular Methods */}
-          <div className="popular-methods">
-            <h3>🔥 Popular</h3>
-            <div className="methods-grid">
-              {paymentMethods.filter(method => method.popular).map((method) => (
-                <button
-                  key={method.id}
-                  onClick={() => handlePaymentSelect(method)}
-                  className={`payment-method ${selectedPayment === method.id ? 'selected' : ''}`}
-                >
-                  <div className="method-icon">{method.icon}</div>
-                  <div className="method-info">
-                    <div className="method-name">{method.name}</div>
-                    <div className="method-desc">{method.description}</div>
-                  </div>
-                  {selectedPayment === method.id && (
-                    <div className="selected-indicator">✓</div>
-                  )}
-                </button>
-              ))}
-            </div>
+          <div className="payment-section">
+            <h2>💳 Choose Payment Method</h2>
+
+            <div className="payment-methods">
+            {paymentMethods.filter(method => method.popular).map((method) => (
+              <button
+                key={method.id}
+                onClick={() => handlePaymentSelect(method)}
+                className={`payment-method ${selectedPayment === method.id ? 'selected' : ''}`}
+              >
+                <div className="method-icon">{method.icon}</div>
+                <div className="method-info">
+                  <div className="method-name">{method.name}</div>
+                  <div className="method-desc">{method.description}</div>
+                </div>
+                {selectedPayment === method.id && (
+                  <div className="selected-indicator">✓</div>
+                )}
+              </button>
+            ))}
+            {paymentMethods.filter(method => !method.popular).map((method) => (
+              <button
+                key={method.id}
+                onClick={() => handlePaymentSelect(method)}
+                className={`payment-method ${selectedPayment === method.id ? 'selected' : ''}`}
+              >
+                <div className="method-icon">{method.icon}</div>
+                <div className="method-info">
+                  <div className="method-name">{method.name}</div>
+                  <div className="method-desc">{method.description}</div>
+                </div>
+                {selectedPayment === method.id && (
+                  <div className="selected-indicator">✓</div>
+                )}
+              </button>
+            ))}
           </div>
 
-          {/* All Methods */}
-          <div className="all-methods">
-            <h3>All Payment Options</h3>
-            <div className="methods-grid">
-              {paymentMethods.filter(method => !method.popular).map((method) => (
-                <button
-                  key={method.id}
-                  onClick={() => handlePaymentSelect(method)}
-                  className={`payment-method ${selectedPayment === method.id ? 'selected' : ''}`}
-                >
-                  <div className="method-icon">{method.icon}</div>
-                  <div className="method-info">
-                    <div className="method-name">{method.name}</div>
-                    <div className="method-desc">{method.description}</div>
-                  </div>
-                  {selectedPayment === method.id && (
-                    <div className="selected-indicator">✓</div>
-                  )}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Card Payment Form */}
-          {showCardForm && (
+            {showCardForm && (
             <div className="payment-form card-form">
               <h3>💳 Enter Card Details</h3>
               <div className="form-group">
@@ -391,6 +432,7 @@ const Payment = ({ isAuthenticated, currentUser }) => {
                   value={cardDetails.number}
                   onChange={(e) => handleCardInputChange('number', e.target.value)}
                   maxLength="19"
+                  className="p-2 border rounded text-black"
                 />
               </div>
               <div className="form-group">
@@ -400,6 +442,7 @@ const Payment = ({ isAuthenticated, currentUser }) => {
                   placeholder="Full name as on card"
                   value={cardDetails.name}
                   onChange={(e) => handleCardInputChange('name', e.target.value)}
+                  className="p-2 border rounded text-black"
                 />
               </div>
               <div className="form-row">
@@ -411,17 +454,19 @@ const Payment = ({ isAuthenticated, currentUser }) => {
                     value={cardDetails.expiry}
                     onChange={(e) => handleCardInputChange('expiry', e.target.value)}
                     maxLength="5"
+                    className="p-2 border rounded text-black"
                   />
                 </div>
                 <div className="form-group">
                   <label>CVV</label>
-                  <input
-                    type="password"
-                    placeholder="123"
-                    value={cardDetails.cvv}
-                    onChange={(e) => handleCardInputChange('cvv', e.target.value)}
-                    maxLength="4"
-                  />
+                    <input
+                      type="password"
+                      placeholder="123"
+                      value={cardDetails.cvv}
+                      onChange={(e) => handleCardInputChange('cvv', e.target.value)}
+                      maxLength="4"
+                      className="p-2 border rounded text-black"
+                    />
                 </div>
               </div>
               <div className="card-types">
@@ -433,8 +478,7 @@ const Payment = ({ isAuthenticated, currentUser }) => {
             </div>
           )}
 
-          {/* UPI Payment Form (for popular UPI apps and other UPI) */}
-          {showUPIForm && (
+            {showUPIForm && (
             <div className="payment-form upi-form">
               {selectedPayment === 'upi' ? (
                 <>
@@ -469,6 +513,7 @@ const Payment = ({ isAuthenticated, currentUser }) => {
                     }
                     value={upiId}
                     onChange={(e) => setUpiId(e.target.value)}
+                    className="p-2 border rounded text-black"
                   />
                   <small>
                     {selectedPayment === 'upi'
@@ -480,8 +525,7 @@ const Payment = ({ isAuthenticated, currentUser }) => {
             </div>
           )}
 
-          {/* Net Banking Form */}
-          {showNetBankingForm && (
+            {showNetBankingForm && (
             <div className="payment-form netbanking-form">
               <h3>🏦 Net Banking</h3>
               
@@ -510,6 +554,7 @@ const Payment = ({ isAuthenticated, currentUser }) => {
                       placeholder="Enter your username"
                       value={netBankingDetails.username}
                       onChange={(e) => handleNetBankingChange('username', e.target.value)}
+                      className="p-2 border rounded text-black"
                     />
                   </div>
                   
@@ -520,6 +565,7 @@ const Payment = ({ isAuthenticated, currentUser }) => {
                       placeholder="Enter your password"
                       value={netBankingDetails.password}
                       onChange={(e) => handleNetBankingChange('password', e.target.value)}
+                      className="p-2 border rounded text-black"
                     />
                   </div>
                   
@@ -530,6 +576,7 @@ const Payment = ({ isAuthenticated, currentUser }) => {
                       placeholder="Enter transaction password"
                       value={netBankingDetails.transactionPassword}
                       onChange={(e) => handleNetBankingChange('transactionPassword', e.target.value)}
+                      className="p-2 border rounded text-black"
                     />
                     <small>Some banks require an additional transaction password</small>
                   </div>
@@ -538,8 +585,7 @@ const Payment = ({ isAuthenticated, currentUser }) => {
             </div>
           )}
 
-          {/* Pay Button */}
-          {selectedPayment && (
+            {selectedPayment && (
             <div className="pay-section">
               <button 
                 className="pay-btn"
@@ -561,14 +607,19 @@ const Payment = ({ isAuthenticated, currentUser }) => {
                 <p>💡 Amount will be debited only after successful recharge</p>
               </div>
             </div>
-          )}
+          </div>
         </div>
       </div>
-
-      {/* Support */}
       <div className="payment-footer">
         <p>Need help? Contact us at <strong>support@recharge.com</strong> or call <strong>1800-123-4567</strong></p>
+        <p>Copyright 2023 Recharge.com. All rights reserved.</p>
       </div>
+
+      {showVerification && (
+        <MobileVerification
+          onClose={handleVerificationClose}
+        />
+      )}
     </div>
   );
 };

@@ -1,18 +1,17 @@
 .bsnl-page {
   margin-top: 80px;
   min-height: 100vh;
-  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  background: linear-gradient(135deg, #fff8f0 0%, #ffede0 100%);
 }
 
 /* Operator Navbar */
 .operator-navbar {
-  background: white;
-  border-bottom: 1px solid #e0e0e0;
-  padding: 15px 0;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.08);
-  backdrop-filter: blur(10px);
+  background: linear-gradient(135deg, #ff6600 0%, #e55a00 100%);
+  border-bottom: 1px solid #e55a00;
+  padding: 12px 0;
+  box-shadow: 0 2px 8px rgba(255, 102, 0, 0.3);
   position: relative;
-  z-index: 2000; /* Increased z-index for navbar */
+  z-index: 2000;
 }
 
 .navbar-container {
@@ -38,7 +37,7 @@
 .operator-name {
   font-size: 1.5rem;
   font-weight: 700;
-  color: #0161b0; /* BSNL's brand blue color */
+  color: white;
   margin-left: 10px;
 }
 
@@ -56,7 +55,7 @@
   border: none;
   font-size: 0.95rem;
   font-weight: 500;
-  color: #6c757d;
+  color: white;
   padding: 10px 16px;
   cursor: pointer;
   border-radius: 8px;
@@ -64,9 +63,8 @@
 }
 
 .dropdown-btn:hover {
-  background-color: #f8f9fa;
-  color: #495057;
-  transform: translateY(-1px);
+  background-color: rgba(255, 255, 255, 0.2);
+  color: white;
 }
 
 .dropdown-content {
@@ -78,7 +76,7 @@
   min-width: 180px;
   box-shadow: 0 8px 25px rgba(0,0,0,0.15);
   border-radius: 12px;
-  z-index: 2100; /* Increased z-index to be above all content */
+  z-index: 2100;
   border: 1px solid #e9ecef;
 }
 
@@ -118,28 +116,28 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  background: #f8f9fa;
+  background: rgba(255, 255, 255, 0.2);
   padding: 8px 16px;
   border-radius: 25px;
-  border: 1px solid #e9ecef;
+  border: 1px solid rgba(255, 255, 255, 0.3);
 }
 
 .profile-icon {
   width: 32px;
   height: 32px;
-  background: linear-gradient(135deg, #6c757d, #495057);
+  background: white;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: white;
+  color: #ff6600;
   font-weight: 600;
   font-size: 0.9rem;
 }
 
 .profile-name {
   font-weight: 600;
-  color: #495057;
+  color: white;
   font-size: 0.9rem;
 }
 
@@ -151,7 +149,7 @@
   gap: 24px;
   padding: 0 20px;
   position: relative;
-  z-index: 1; /* Lower z-index for main content */
+  z-index: 1;
 }
 
 /* Left Panel */
@@ -164,7 +162,7 @@
   height: fit-content;
   border: 1px solid #e9ecef;
   position: relative;
-  z-index: 10; /* Moderate z-index for left panel */
+  z-index: 10;
 }
 
 .mobile-input-section,
@@ -212,7 +210,7 @@
   font-size: 1rem;
   transition: all 0.3s ease;
   background: white;
-  color: #495057; /* Fixed: Added black text color */
+  color: #495057;
 }
 
 .mobile-input:focus {
@@ -222,7 +220,7 @@
 }
 
 .mobile-input::placeholder {
-  color: #adb5bd; /* Added placeholder color */
+  color: #adb5bd;
 }
 
 .search-input {
@@ -233,7 +231,7 @@
   font-size: 1rem;
   transition: all 0.3s ease;
   background: white;
-  color: #495057; /* Fixed: Added black text color */
+  color: #495057;
 }
 
 .search-input:focus {
@@ -243,14 +241,14 @@
 }
 
 .search-input::placeholder {
-  color: #adb5bd; /* Added placeholder color */
+  color: #adb5bd;
 }
 
 .search-btn {
   position: absolute;
   right: 4px;
   top: 4px;
-  background: #0161b0; /* BSNL's brand blue color */
+  background: #ff6600;
   color: white;
   border: none;
   padding: 8px 16px;
@@ -262,15 +260,14 @@
 }
 
 .search-btn:hover {
-  background: #014d8c;
-  transform: translateY(-1px);
+  background: #e55a00;
 }
 
 /* Right Panel */
 .right-panel {
   width: 65%;
   position: relative;
-  z-index: 5; /* Lower z-index for right panel */
+  z-index: 5;
 }
 
 .pack-categories {
@@ -284,7 +281,7 @@
   box-shadow: 0 4px 20px rgba(0,0,0,0.08);
   border: 1px solid #e9ecef;
   position: relative;
-  z-index: 5; /* Ensure categories are below dropdown */
+  z-index: 5;
 }
 
 .pack-categories button {
@@ -307,11 +304,11 @@
 }
 
 .pack-categories button.active {
-  background: #0161b0; /* BSNL's brand blue color */
+  background: #ff6600;
   color: white;
-  border-color: #0161b0;
+  border-color: #ff6600;
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(1, 97, 176, 0.3);
+  box-shadow: 0 4px 12px rgba(255, 102, 0, 0.3);
 }
 
 .packs-grid {
@@ -319,7 +316,7 @@
   grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
   gap: 20px;
   position: relative;
-  z-index: 1; /* Lowest z-index for pack cards */
+  z-index: 1;
 }
 
 .pack-card {
@@ -331,7 +328,7 @@
   border: 1px solid #e9ecef;
   position: relative;
   overflow: hidden;
-  z-index: 1; /* Ensure pack cards are below dropdowns */
+  z-index: 1;
 }
 
 .pack-card::before {
@@ -341,13 +338,13 @@
   left: 0;
   width: 4px;
   height: 100%;
-  background: linear-gradient(135deg, #0161b0, #014d8c); /* BSNL's brand blue gradient */
+  background: linear-gradient(135deg, #ff6600, #e55a00);
 }
 
 .pack-card:hover {
   transform: translateY(-8px);
   box-shadow: 0 12px 40px rgba(0,0,0,0.15);
-  z-index: 2; /* Slightly higher on hover but still below dropdowns */
+  z-index: 2;
 }
 
 .pack-amount {
@@ -393,22 +390,21 @@
 
 .recharge-btn {
   width: 100%;
-  background: linear-gradient(135deg, #0161b0, #014d8c); /* BSNL's brand blue gradient */
+  background: linear-gradient(135deg, #ff6600, #e55a00);
   color: white;
   border: none;
-  padding: 14px;
-  border-radius: 12px;
-  font-size: 1rem;
-  font-weight: 600;
+  padding: 12px;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 500;
   cursor: pointer;
   transition: all 0.3s ease;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
 }
 
 .recharge-btn:hover {
+  background: linear-gradient(135deg, #e55a00, #cc4d00);
   transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(1, 97, 176, 0.3);
+  box-shadow: 0 4px 12px rgba(255, 102, 0, 0.3);
 }
 
 /* Responsive Design */

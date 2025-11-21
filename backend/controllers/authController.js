@@ -2,6 +2,7 @@ const User = require('../models/User');
 const generateOTP = require('../utils/generateOTP');
 const sendSMS = require('../utils/sendSMS');
 const jwt = require('jsonwebtoken');
+const logger = require('../utils/logger');
 
 // Register user
 exports.register = async (req, res) => {
@@ -11,7 +12,8 @@ exports.register = async (req, res) => {
     // Check if user exists
     let user = await User.findOne({ $or: [{ email }, { phone }] });
     if (user) {
-      return res.status(400).json({ msg: 'User already exists' });
+      logger.warn('Register attempt for existing user', { email, phone });
+      return res.status(400).json({ success: false, message: 'User already exists' });
     }
 
     // Create user
@@ -29,29 +31,34 @@ exports.register = async (req, res) => {
 
     await user.save();
 
-    // Send OTP via SMS
+    // Send OTP via SMS (best-effort)
     const message = `Your OTP for mobile recharge app is ${otp}. It expires in 10 minutes.`;
-    await sendSMS(phone, message);
+    const smsSent = await sendSMS(phone, message);
 
     // Generate token
-    const payload = {
-      user: {
-        id: user.id,
-      },
-    };
+    const payload = { user: { id: user.id } };
 
-    jwt.sign(
-      payload,
-      process.env.JWT_SECRET,
-      { expiresIn: '1h' },
-      (err, token) => {
-        if (err) throw err;
-        res.json({ token });
+    jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' }, (err, token) => {
+      if (err) {
+        logger.error('JWT sign error during register', { error: err.message });
+        return res.status(500).json({ success: false, message: 'Failed to create account token' });
       }
-    );
+      logger.info('User registered', { userId: user.id, smsSent });
+      const userData = {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        phone: user.phone,
+      };
+      return res.status(201).json({
+        success: true,
+        message: 'User registered successfully',
+        data: { token, user: userData },
+      });
+    });
   } catch (err) {
-    console.error(err.message);
-    res.status(500).send('Server error');
+    logger.error('Error in register', { error: err.message });
+    res.status(500).json({ success: false, message: 'Server error' });
   }
 };
 
@@ -62,11 +69,13 @@ exports.verifyOTP = async (req, res) => {
     const user = await User.findById(req.user.id);
 
     if (!user) {
-      return res.status(400).json({ msg: 'User not found' });
+      logger.warn('Verify OTP: user not found', { userId: req.user && req.user.id });
+      return res.status(404).json({ success: false, message: 'User not found' });
     }
 
     if (user.otp !== otp || user.otpExpires < new Date()) {
-      return res.status(400).json({ msg: 'Invalid or expired OTP' });
+      logger.warn('Verify OTP failed', { userId: user.id });
+      return res.status(400).json({ success: false, message: 'Invalid or expired OTP' });
     }
 
     user.isVerified = true;
@@ -74,10 +83,11 @@ exports.verifyOTP = async (req, res) => {
     user.otpExpires = undefined;
     await user.save();
 
-    res.json({ msg: 'Phone number verified successfully' });
+    logger.info('User phone verified', { userId: user.id });
+    return res.json({ success: true, message: 'Phone number verified successfully' });
   } catch (err) {
-    console.error(err.message);
-    res.status(500).send('Server error');
+    logger.error('Error in verifyOTP', { error: err.message });
+    res.status(500).json({ success: false, message: 'Server error' });
   }
 };
 
@@ -94,32 +104,39 @@ exports.login = async (req, res) => {
       ]
     });
     if (!user) {
-      return res.status(400).json({ msg: 'Invalid credentials' });
+      logger.warn('Login failed: user not found', { emailOrUsername });
+      return res.status(400).json({ success: false, message: 'Invalid credentials' });
     }
 
     const isMatch = await user.comparePassword(password);
     if (!isMatch) {
-      return res.status(400).json({ msg: 'Invalid credentials' });
+      logger.warn('Login failed: invalid password', { userId: user.id });
+      return res.status(400).json({ success: false, message: 'Invalid credentials' });
     }
 
-    const payload = {
-      user: {
-        id: user.id,
-      },
-    };
+    const payload = { user: { id: user.id } };
 
-    jwt.sign(
-      payload,
-      process.env.JWT_SECRET,
-      { expiresIn: '1h' },
-      (err, token) => {
-        if (err) throw err;
-        res.json({ token });
+    jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' }, (err, token) => {
+      if (err) {
+        logger.error('JWT sign error during login', { error: err.message });
+        return res.status(500).json({ success: false, message: 'Failed to create token' });
       }
-    );
+      logger.info('User logged in', { userId: user.id });
+      const userData = {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        phone: user.phone,
+      };
+      return res.status(200).json({
+        success: true,
+        message: 'Login successful',
+        data: { token, user: userData },
+      });
+    });
   } catch (err) {
-    console.error(err.message);
-    res.status(500).send('Server error');
+    logger.error('Error in login', { error: err.message });
+    res.status(500).json({ success: false, message: 'Server error' });
   }
 };
 
@@ -127,9 +144,9 @@ exports.login = async (req, res) => {
 exports.getProfile = async (req, res) => {
   try {
     const user = await User.findById(req.user.id).select('-password -otp -otpExpires');
-    res.json(user);
+    res.json({ success: true, data: user });
   } catch (err) {
-    console.error(err.message);
-    res.status(500).send('Server error');
+    logger.error('Error in getProfile', { error: err.message });
+    res.status(500).json({ success: false, message: 'Server error' });
   }
 };

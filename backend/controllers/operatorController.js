@@ -1,13 +1,19 @@
 const Operator = require('../models/Operator');
 
-// Get all operators
+// Get all operators with optional filters: ?type=&circle=&q=
 exports.getAllOperators = async (req, res) => {
   try {
-    const operators = await Operator.find();
-    res.json(operators);
+    const { type, circle, q } = req.query;
+    const filter = {};
+    if (type) filter.type = type;
+    if (circle) filter.circle = circle;
+    if (q) filter.name = { $regex: q, $options: 'i' };
+
+    const operators = await Operator.find(filter).lean();
+    return res.json({ success: true, data: operators });
   } catch (err) {
-    console.error(err.message);
-    res.status(500).send('Server error');
+    console.error(err);
+    return res.status(500).json({ success: false, message: 'Server error' });
   }
 };
 

@@ -1,31 +1,26 @@
-const twilio = require('twilio');
-const dotenv = require('dotenv');
-dotenv.config();
+// backend/utils/sendSMS.js
+const client = require('../config/twilio');
 
-const accountSid = process.env.TWILIO_ACCOUNT_SID;
-const authToken = process.env.TWILIO_AUTH_TOKEN;
-const twilioPhoneNumber = process.env.TWILIO_PHONE_NUMBER;
+async function sendSMS(to, body) {
+  // 🔹 Dev mode: mock SMS (no real Twilio call)
+  if (process.env.MOCK_SMS === 'true') {
+    console.log(`[MOCK SMS] To: ${to} | Message: ${body}`);
+    return true;
+  }
 
-// Add validation
-if (!accountSid || !authToken || !twilioPhoneNumber) {
-  throw new Error("Twilio credentials are missing in .env file");
-}
-
-const client = twilio(accountSid, authToken);
-
-const sendSMS = async (to, body) => {
   try {
     const message = await client.messages.create({
+      to,
+      from: process.env.TWILIO_PHONE_NUMBER,
       body,
-      from: twilioPhoneNumber,
-      to: `+91${to}` // Assuming Indian numbers
     });
-    console.log(`SMS sent: ${message.sid}`);
+
+    console.log('SMS sent:', message.sid);
     return true;
   } catch (err) {
     console.error('Error sending SMS:', err.message);
     return false;
   }
-};
+}
 
 module.exports = sendSMS;
