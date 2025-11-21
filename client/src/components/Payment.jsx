@@ -245,25 +245,25 @@ const Payment = ({ isAuthenticated, currentUser }) => {
       if (!rechargeResponse.ok) {
         const errorData = await rechargeResponse.json();
         alert(`Recharge failed: ${errorData.msg || 'Unknown error'}`);
-        return;
-      }
+              <button
+                className="pay-btn"
+                onClick={handlePayment}
+                disabled={isProcessing}
+              >
+                {isProcessing ? (
+                  <div className="processing">
+                    <div className="spinner"></div>
+                    Processing Payment...
+                  </div>
+                ) : (
+                  <>{"Pay ₹" + rechargeDetails.amount}</>
+                )}
+              </button>
 
-      const rechargeData = await rechargeResponse.json();
-      
-      // Send recharge confirmation email
-      await axios.post('http://localhost:5000/api/email/send-confirmation', {
-  email: rechargeDetails.email,
-  rechargeDetails: {
-    ...rechargeDetails,
-    currentUser: currentUser?.name || 'User',
-    transactionId: rechargeData.transactionId
-  }
-});
-
-
-      alert(`Payment Successful! ₹${rechargeDetails.amount} recharged for ${rechargeDetails.mobileNumber}. Transaction ID: ${rechargeData.transactionId}`);
-      navigate(-1);
-    } catch (error) {
+              <div className="security-note">
+                <p>🔒 Your payment is secured with 256-bit SSL encryption</p>
+                <p>💡 Amount will be debited only after successful recharge</p>
+              </div>
       alert('Payment failed. Please try again.');
     } finally {
       setIsProcessing(false);
