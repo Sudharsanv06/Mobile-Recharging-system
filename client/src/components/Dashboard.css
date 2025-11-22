@@ -1,0 +1,29 @@
+.dashboard-page{padding:20px;max-width:1100px;margin:0 auto;font-family:Inter,system-ui,Arial,Helvetica,sans-serif}
+.dashboard-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
+.user-block{display:flex;align-items:center}
+.avatar{width:64px;height:64px;border-radius:18px;background:linear-gradient(135deg,#6dd3ff,#2b9cff);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:24px;margin-right:12px}
+.user-info{line-height:1}
+.user-name{font-weight:700;font-size:18px}
+.user-phone{color:#666;font-size:13px}
+.wallet-block{background:#fff;padding:12px 16px;border-radius:12px;box-shadow:0 6px 18px rgba(11,20,40,0.06);text-align:right}
+.wallet-balance-label{font-size:12px;color:#777}
+.wallet-balance{font-size:20px;font-weight:700;margin:6px 0}
+.add-money-btn{background:linear-gradient(90deg,#00c853,#00e676);border:none;color:#fff;padding:8px 12px;border-radius:8px;font-weight:700;cursor:pointer}
+.dashboard-cards{display:flex;gap:12px;margin:18px 0}
+.card{flex:1;background:linear-gradient(180deg,#fff,#fbfcff);padding:14px;border-radius:12px;box-shadow:0 6px 20px rgba(8,18,40,0.04)}
+.card-title{font-size:13px;color:#666;margin-bottom:8px}
+.card-value{font-size:20px;font-weight:700}
+.chart-card .chart{height:48px;display:flex;align-items:center;justify-content:center}
+.sparkline{width:100%;height:48px}
+.recent-list{margin-top:12px;background:transparent}
+.recent-list h3{margin-bottom:8px}
+.recent-item{display:flex;align-items:center;background:#fff;padding:10px;border-radius:10px;margin-bottom:8px;box-shadow:0 6px 18px rgba(11,20,40,0.04)}
+.op-logo{width:44px;height:44px;border-radius:8px;object-fit:contain;margin-right:12px}
+.item-info{flex:1}
+.amount{font-weight:700}
+.meta{font-size:13px;color:#666}
+.status{padding:6px 10px;border-radius:12px;font-weight:700}
+.status.success{background:rgba(40,167,69,0.12);color:#28a745}
+.status.failed{background:rgba(220,53,69,0.08);color:#dc3545}
+.loading{color:#666}
+.no-data{color:#999}

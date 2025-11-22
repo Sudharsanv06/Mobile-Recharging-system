@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Home from './components/Home';
@@ -17,11 +17,16 @@ import OperatorDetails from './components/OperatorDetails';
 import './App.css';
 import Toast from './components/Toast';
 import Receipt from './components/Receipt';
+import Dashboard from './components/Dashboard';
+import RechargeHistory from './components/RechargeHistory';
+import WalletModal from './components/WalletModal';
 
 const App = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [currentUser, setCurrentUser] = useState('');
   const [rechargeDetails, setRechargeDetails] = useState(null);
+  const [showWallet, setShowWallet] = useState(false);
+  const [balanceUpdated, setBalanceUpdated] = useState(false);
 
   const handleLogin = (username) => {
     setIsAuthenticated(true);
@@ -37,11 +42,23 @@ const App = () => {
     setIsAuthenticated(false);
     setCurrentUser('');
     setRechargeDetails(null);
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
   };
 
   const handleRechargeInitiate = (details) => {
     setRechargeDetails(details);
   };
+
+  // Initialize auth state from localStorage so routes stay protected after reload
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    const user = JSON.parse(localStorage.getItem('user') || 'null');
+    if (token && user) {
+      setIsAuthenticated(true);
+      setCurrentUser(user.name || user.email || '');
+    }
+  }, []);
 
   return (
     <div className="app">
@@ -143,6 +160,14 @@ const App = () => {
                 <Navigate to="/" replace />
               )
             } 
+          />
+          <Route
+            path="/dashboard"
+            element={isAuthenticated ? <Dashboard onOpenWallet={() => setShowWallet(true)} balanceUpdated={balanceUpdated} /> : <Navigate to="/login" replace />}
+          />
+          <Route
+            path="/history"
+            element={isAuthenticated ? <RechargeHistory /> : <Navigate to="/login" replace />}
           />
           <Route
             path="/receipt"

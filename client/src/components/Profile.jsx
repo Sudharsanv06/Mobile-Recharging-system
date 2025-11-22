@@ -1,267 +1,185 @@
-import React, { useState, useEffect } from 'react';
-import { Button, Card, LoadingSpinner, ErrorMessage } from './common';
+import React, { useEffect, useMemo, useState, useRef } from 'react';
+import { Button, LoadingSpinner, ErrorMessage } from './common';
 import { toast } from '../utils/toast';
+import HistoryCard from './common/HistoryCard';
+import StatsCard from './common/StatsCard';
 import './Profile.css';
 
+const OPERATORS = ['Airtel', 'Jio', 'BSNL', 'Vi'];
+
 const Profile = ({ currentUser }) => {
-  const [userData, setUserData] = useState(null);
+  const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [addAmount, setAddAmount] = useState('');
-  const [showAddMoney, setShowAddMoney] = useState(false);
-  const [addingMoney, setAddingMoney] = useState(false);
-  const [editMode, setEditMode] = useState(false);
-  const [localName, setLocalName] = useState('');
-  const [localPhone, setLocalPhone] = useState('');
-  const [updating, setUpdating] = useState(false);
+
+  const [history, setHistory] = useState([]);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const [filter, setFilter] = useState('All');
+  const [loadingMore, setLoadingMore] = useState(false);
+
+  const containerRef = useRef();
 
   useEffect(() => {
-    fetchUserData();
+    loadProfile();
+    // load first page
+    loadHistory(1, filter, true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const fetchUserData = async () => {
+  useEffect(() => {
+    // when filter changes, reload history
+    setPage(1);
+    loadHistory(1, filter, true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filter]);
+
+  const apiBase = process.env.REACT_APP_API_BASE || '';
+
+  const loadProfile = async () => {
     setLoading(true);
     setError('');
     try {
       const token = localStorage.getItem('token');
-      if (!token) {
-        setError('Please login to view profile');
-        return;
-      }
-      const response = await fetch('http://localhost:5000/api/v1/users/profile', {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
+      const res = await fetch(`${apiBase}/api/v1/users/profile`, {
+        headers: { Authorization: `Bearer ${token}` }
       });
-      if (!response.ok) {
-        throw new Error('Failed to fetch profile');
-      }
-      const data = await response.json();
-      setUserData(data);
-      setLocalName(data?.name || '');
-      setLocalPhone(data?.phone || '');
-    } catch (error) {
-      console.error('Error fetching user data:', error);
-      setError('Failed to load profile data');
-      toast.error('Failed to load profile');
+      if (!res.ok) throw new Error('Failed to load profile');
+      const data = await res.json();
+      setUser(data);
+    } catch (err) {
+      console.error(err);
+      setError('Could not load profile');
+      toast.error('Could not load profile');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleAddMoney = async () => {
-    if (!addAmount || addAmount <= 0) {
-      toast.warning('Please enter a valid amount');
-      return;
-    }
-
-    setAddingMoney(true);
+  const loadHistory = async (pageToLoad = 1, operator = 'All', replace = false) => {
+    if (loadingMore) return;
+    if (pageToLoad === 1) setLoadingMore(true);
+    const token = localStorage.getItem('token');
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:5000/api/v1/users/balance', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({ amount: parseInt(addAmount) })
+      const q = new URLSearchParams();
+      q.set('page', pageToLoad);
+      q.set('limit', 10);
+      if (operator && operator !== 'All') q.set('operator', operator);
+      const res = await fetch(`${apiBase}/api/v1/users/recharges?${q.toString()}`, {
+        headers: { Authorization: `Bearer ${token}` }
       });
-
-      if (response.ok) {
-        const data = await response.json();
-        setUserData(prev => ({ ...prev, balance: data.balance }));
-        setAddAmount('');
-        setShowAddMoney(false);
-        toast.success(`Successfully added ₹${addAmount} to your wallet!`);
-      } else {
-        toast.error('Failed to add money to wallet');
-      }
-    } catch (error) {
-      console.error('Error adding money:', error);
-      toast.error('Error adding money to wallet');
-    } finally {
-      setAddingMoney(false);
-    }
-  };
-
-  const handleCopy = (text) => {
-    if (!text) return;
-    if (navigator.clipboard && window.isSecureContext) {
-      navigator.clipboard.writeText(text).then(() => alert('Copied to clipboard'));
-    } else {
-      const el = document.createElement('textarea');
-      el.value = text;
-      document.body.appendChild(el);
-      el.select();
-      try { document.execCommand('copy'); alert('Copied to clipboard'); } catch(e) { alert('Copy failed'); }
-      document.body.removeChild(el);
-    }
-  };
-
-  const toggleEdit = () => {
-    setEditMode(!editMode);
-    // reset local values when entering edit mode
-    if (userData) {
-      setLocalName(userData.name || '');
-      setLocalPhone(userData.phone || '');
-    }
-  };
-
-  const saveProfile = async () => {
-    setUpdating(true);
-    try {
-      const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:5000/api/v1/users/profile', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-        body: JSON.stringify({ name: localName, phone: localPhone })
-      });
-      if (response.ok) {
-        const data = await response.json();
-        setUserData(prev => ({ ...prev, name: data.name, phone: data.phone }));
-        setEditMode(false);
-        toast.success('Profile updated successfully');
-      } else {
-        toast.error('Failed to update profile');
-      }
+      if (!res.ok) throw new Error('Failed to load history');
+      const json = await res.json();
+      const items = Array.isArray(json.data) ? json.data : json;
+      setHasMore((json.meta && json.meta.page < json.meta.pages) || items.length === 10);
+      setHistory(prev => (replace ? items : [...prev, ...items]));
+      setPage(pageToLoad);
     } catch (err) {
       console.error(err);
-      toast.error('Error updating profile');
+      toast.error('Failed to load recharge history');
     } finally {
-      setUpdating(false);
+      setLoadingMore(false);
     }
   };
 
-  if (loading) {
-    return (
-      <div className="profile">
-        <LoadingSpinner fullscreen text="Loading profile..." />
-      </div>
-    );
-  }
+  const loadMore = () => {
+    if (!hasMore) return;
+    const next = page + 1;
+    loadHistory(next, filter, false);
+  };
 
-  if (error) {
-    return (
-      <div className="profile">
-        <div className="error-container">
-          <ErrorMessage 
-            message={error}
-            type="error"
-            onRetry={fetchUserData}
-          />
-        </div>
-      </div>
-    );
-  }
+  const stats = useMemo(() => {
+    const total = history.length;
+    const totalSpent = history.reduce((s, r) => s + (Number(r.amount) || 0), 0);
+    const freq = {};
+    history.forEach(r => { const op = r.operator || r.operatorName || 'Unknown'; freq[op] = (freq[op] || 0) + 1; });
+    const mostUsed = Object.keys(freq).sort((a,b)=>freq[b]-freq[a])[0] || '—';
+    return { total, totalSpent, mostUsed };
+  }, [history]);
+
+  const downloadPDF = async () => {
+    const el = containerRef.current;
+    if (!el) return toast.error('Nothing to export');
+    // prefer html2pdf.js because it's simpler
+    try {
+      const html2pdf = (await import('html2pdf.js')).default;
+      const filename = `profile-${(user?.name || 'user').replace(/\s+/g, '-')}.pdf`;
+      await html2pdf().from(el).set({ filename }).save();
+      return;
+    } catch (err) {
+      // if html2pdf not available, fall back to html2canvas + jspdf
+      console.warn('html2pdf.js not available, falling back to html2canvas+jspdf', err);
+    }
+
+    try {
+      const html2canvas = (await import('html2canvas')).default;
+      const { jsPDF } = await import('jspdf');
+      const canvas = await html2canvas(el, { scale: 2 });
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF({ orientation: 'portrait', unit: 'px', format: [canvas.width, canvas.height] });
+      pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
+      pdf.save(`profile-${user?.name || 'user'}.pdf`);
+      return;
+    } catch (err) {
+      console.error(err);
+      if (window.confirm('PDF export requires additional packages. Open print dialog as fallback?')) window.print();
+    }
+  };
+
+  if (loading) return <div className="profile"><LoadingSpinner fullscreen text="Loading profile..." /></div>;
+  if (error) return <div className="profile"><ErrorMessage message={error} onRetry={loadProfile} /></div>;
 
   return (
-    <div className="profile">
-      <div className="profile-container">
+    <div className="profile profile-premium" ref={containerRef}>
+      <div className="profile-top">
         <div className="profile-left">
           <div className="profile-card">
-            <div className="profile-avatar big">
-              <span className="avatar-text">{(userData?.name || currentUser || 'U').charAt(0).toUpperCase()}</span>
-            </div>
-            <h2 className="name-title">{userData?.name || currentUser}</h2>
-            <p className="profile-subtitle">Manage your mobile recharge account</p>
-
-            <div className="personal-info">
-              <div className="info-row">
-                <div>
-                  <div className="info-label">Email</div>
-                  <div className="info-value">{userData?.email || `${currentUser.toLowerCase()}@example.com`}</div>
-                </div>
-                <button className="copy-btn" onClick={() => handleCopy(userData?.email || `${currentUser.toLowerCase()}@example.com`)}>Copy</button>
-              </div>
-
-              <div className="info-row">
-                <div>
-                  <div className="info-label">Phone</div>
-                  <div className="info-value">{userData?.phone || '+91 98765 43210'}</div>
-                </div>
-                <button className="copy-btn" onClick={() => handleCopy(userData?.phone || '+91 98765 43210')}>Copy</button>
-              </div>
-
-              <div className="info-row">
-                <div>
-                  <div className="info-label">Member Since</div>
-                  <div className="info-value">{userData?.createdAt ? new Date(userData.createdAt).toLocaleDateString() : 'January 2025'}</div>
-                </div>
-              </div>
-
-              <div className="profile-actions">
-                {!editMode ? (
-                  <Button variant="primary" onClick={toggleEdit}>Edit Profile</Button>
-                ) : (
-                  <>
-                    <input className="inline-input" value={localName} onChange={(e) => setLocalName(e.target.value)} placeholder="Name" />
-                    <input className="inline-input" value={localPhone} onChange={(e) => setLocalPhone(e.target.value)} placeholder="Phone" />
-                    <div style={{display:'flex',gap:8, marginTop: 8}}>
-                      <Button variant="primary" onClick={saveProfile} loading={updating} disabled={updating}>
-                        Save
-                      </Button>
-                      <Button variant="outline" onClick={toggleEdit} disabled={updating}>
-                        Cancel
-                      </Button>
-                    </div>
-                  </>
-                )}
-              </div>
+            <div className="avatar-large">{(user?.name || currentUser || 'U').charAt(0).toUpperCase()}</div>
+            <h2 className="user-name">{user?.name}</h2>
+            <div className="user-meta">{user?.email} · {user?.phone}</div>
+            <div className="joined">Joined {user?.createdAt ? new Date(user.createdAt).toLocaleDateString() : '—'}</div>
+            <div className="balance">₹{user?.balance ?? 0}</div>
+            <div className="profile-actions-compact">
+              <Button variant="primary" onClick={() => navigator.clipboard?.writeText(user?.email || '') || toast.info('Copied')}>Copy Email</Button>
+              <Button variant="outline" onClick={downloadPDF}>Download PDF</Button>
             </div>
           </div>
         </div>
 
         <div className="profile-right">
-          <div className="profile-section">
-            <h3>Wallet Balance</h3>
-            <div className="wallet-section">
-              <div className="balance-display">
-                <span className="balance-amount">₹{userData?.balance || 0}</span>
-                <span className="balance-label">Available Balance</span>
-              </div>
-              <Button 
-                variant={showAddMoney ? "outline" : "success"}
-                onClick={() => setShowAddMoney(!showAddMoney)}
-              >
-                {showAddMoney ? 'Cancel' : 'Add Money'}
-              </Button>
+          {!apiBase && (
+            <div className="config-note">
+              Backend API base not configured. Set `REACT_APP_API_BASE` in your `.env` (e.g. `REACT_APP_API_BASE=http://localhost:5000`) to enable full functionality.
             </div>
-            {showAddMoney && (
-              <div className="add-money-form">
-                <input
-                  type="number"
-                  placeholder="Enter amount"
-                  value={addAmount}
-                  onChange={(e) => setAddAmount(e.target.value)}
-                  className="amount-input"
-                  disabled={addingMoney}
-                />
-                <Button 
-                  variant="success"
-                  onClick={handleAddMoney}
-                  loading={addingMoney}
-                  disabled={addingMoney || !addAmount}
-                  fullWidth
-                >
-                  Add Money
-                </Button>
-              </div>
-            )}
+          )}
+          <div className="stats-row">
+            <StatsCard title="Total Recharges" value={stats.total} />
+            <StatsCard title="Total Spent" value={`₹${stats.totalSpent}`} />
+            <StatsCard title="Most Used" value={stats.mostUsed} />
           </div>
 
-          <div className="profile-section">
-            <h3>Quick Actions</h3>
-            <div className="actions-grid">
-              <Button variant="primary">New Recharge</Button>
-              <Button variant="secondary">Recharge History</Button>
-              <Button variant="secondary">Wallet Balance</Button>
+          <div className="history-section">
+            <div className="history-header">
+              <h3>Recharge History</h3>
+              <div className="filters">
+                <button className={`chip ${filter==='All'?'active':''}`} onClick={() => setFilter('All')}>All</button>
+                {OPERATORS.map(op => (
+                  <button key={op} className={`chip ${filter===op?'active':''}`} onClick={() => setFilter(op)}>{op}</button>
+                ))}
+              </div>
             </div>
-          </div>
 
-          <div className="profile-section">
-            <h3>Recent Activity</h3>
-            <div className="recent-list">
-              <div className="recent-item">No recent transactions — try a recharge.</div>
+            <div className="history-list">
+              {history.length === 0 && <div className="empty">No recharges yet.</div>}
+              {history.map(item => <HistoryCard key={item._id || item.id || Math.random()} item={item} />)}
+            </div>
+
+            <div className="history-footer">
+              {hasMore ? (
+                <Button variant="primary" onClick={loadMore} loading={loadingMore}>Load More</Button>
+              ) : (
+                <div className="end">End of history</div>
+              )}
             </div>
           </div>
         </div>

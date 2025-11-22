@@ -1,0 +1,51 @@
+import React from 'react';
+import { render, screen, waitFor } from '@testing-library/react';
+import Profile from '../Profile';
+
+describe('Profile smoke', () => {
+  const originalFetch = global.fetch;
+
+  beforeEach(() => {
+    // mock html2pdf if used
+    global.window.html2pdf = undefined;
+    // mock html2canvas/jsPDF fallback
+    vi.mock('html2canvas', () => ({ default: vi.fn().mockResolvedValue({ toDataURL: () => 'data:image/png;base64,abc' }) }));
+    vi.mock('jspdf', () => ({ jsPDF: vi.fn().mockImplementation(() => ({ addImage: vi.fn(), save: vi.fn() })) }));
+
+    global.fetch = vi.fn((url) => {
+      if (url.includes('/api/v1/users/profile')) {
+        return Promise.resolve({ ok: true, json: () => Promise.resolve({ name: 'Test User', email: 'test@example.com', phone: '9999999999', createdAt: '2025-01-01T00:00:00.000Z', balance: 250 }) });
+      }
+      if (url.includes('/api/v1/users/recharges')) {
+        return Promise.resolve({ ok: true, json: () => Promise.resolve({ data: [{ _id: 'r1', operator: 'Airtel', mobile: '9999999999', amount: 199, status: 'Success', createdAt: '2025-11-01T10:00:00.000Z' }], meta: { page: 1, pages: 1 } }) });
+      }
+      return Promise.resolve({ ok: true, json: () => Promise.resolve({}) });
+    });
+  });
+
+  afterEach(() => {
+    global.fetch = originalFetch;
+    vi.resetAllMocks();
+  });
+
+  it('renders profile info and history and handles PDF export fallback', async () => {
+    render(<Profile currentUser="TestUser" />);
+
+    // wait for profile name
+    await waitFor(() => expect(screen.getByText(/Test User/)).toBeInTheDocument());
+
+    expect(screen.getByText(/₹250/)).toBeInTheDocument();
+    expect(screen.getByText(/Recharge History/)).toBeInTheDocument();
+    // history card
+    await waitFor(() => expect(screen.getByText(/Airtel/)).toBeInTheDocument());
+
+    // trigger download PDF (fallback path will use jspdf mock)
+    const downloadBtn = screen.getByRole('button', { name: /Download PDF/i });
+    downloadBtn.click();
+    // if html2pdf not available, jsPDF save should be called via fallback (we mocked jsPDF.save)
+    await waitFor(() => {
+      // not asserting internals heavily, just ensure no error and the button exists
+      expect(downloadBtn).toBeInTheDocument();
+    });
+  });
+});

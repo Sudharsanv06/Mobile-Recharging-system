@@ -7,6 +7,7 @@ const Navbar = ({ isAuthenticated, currentUser, onLogout }) => {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchValue, setSearchValue] = useState('');
   const searchInputRef = useRef(null);
+  const linksRef = useRef(null);
   const navigate = useNavigate();
 
   const toggleMobileMenu = () => {
@@ -76,6 +77,21 @@ const Navbar = ({ isAuthenticated, currentUser, onLogout }) => {
     };
   }, [isSearchOpen]);
 
+  // Animate navbar items when auth state or mobile menu changes
+  useEffect(() => {
+    const el = linksRef.current;
+    if (!el) return;
+    // trigger reflow to restart animation
+    el.classList.remove('animate');
+    // small timeout to allow removal
+    const t = setTimeout(() => {
+      el.classList.add('animate');
+      // remove class after animation completes to keep DOM clean
+      setTimeout(() => el.classList.remove('animate'), 800);
+    }, 30);
+    return () => clearTimeout(t);
+  }, [isAuthenticated, isMobileMenuOpen]);
+
   return (
     <nav className="navbar">
       <div className="navbar-container">
@@ -87,12 +103,14 @@ const Navbar = ({ isAuthenticated, currentUser, onLogout }) => {
         </Link>
 
         <div className={`navbar-right ${isMobileMenuOpen ? 'mobile-open' : ''}`}>
-          <ul className="navbar-links">
+          <ul className="navbar-links" ref={linksRef}>
             <li><Link to="/" className="nav-link" onClick={handleLinkClick}>Home</Link></li>
             <li><Link to="/about" className="nav-link" onClick={handleLinkClick}>About</Link></li>
 
             {isAuthenticated ? (
               <>
+                <li><Link to="/dashboard" className="nav-link" onClick={handleLinkClick}>Dashboard</Link></li>
+                <li><Link to="/history" className="nav-link" onClick={handleLinkClick}>History</Link></li>
                 <li>
                   <Link to="/profile" className="nav-link profile-link" onClick={handleLinkClick}>
                     <div className="profile-avatar">

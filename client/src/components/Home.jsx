@@ -87,6 +87,9 @@ const Home = ({ isAuthenticated, currentUser }) => {
         <div className="hero-content">
           <h1>Welcome to Top It Up</h1>
           <p>Enjoy lightning-fast, secure and rewarding mobile recharges</p>
+          <div style={{marginTop:12}}>
+            <button className="primary-cta" onClick={() => navigate('/profile')}>View Profile</button>
+          </div>
         </div>
       </section>
 

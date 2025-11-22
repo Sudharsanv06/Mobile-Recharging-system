@@ -1,254 +1,160 @@
+// Vi.jsx
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './Vi.css';
-import ViLogo from './vi-vodafone-idea.svg';
+import './Operator.css';
+import ViLogo from './vi-logo.svg';
 
 const Vi = ({ isAuthenticated, currentUser, onRechargeInitiate }) => {
-  const [mobileNumber, setMobileNumber] = useState('');
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('recommended');
-  const [operator, setOperator] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const navigate = useNavigate();
+	const [mobileNumber, setMobileNumber] = useState('');
+	const [searchQuery, setSearchQuery] = useState('');
+	const [selectedCategory, setSelectedCategory] = useState('recommended');
+	const [operator, setOperator] = useState(null);
+	const [loading, setLoading] = useState(true);
+	const navigate = useNavigate();
 
-  useEffect(() => {
-    if (!isAuthenticated) {
-      navigate('/login');
-    }
-  }, [isAuthenticated, navigate]);
+	const fallbackPlans = {
+		name: 'Vi',
+		_id: 'vi-fallback',
+		plans: [
+			{ _id: 'v-r1', amount: 99, validity: '28 days', data: '1.5GB/day', calls: 'Unlimited', sms: '100/day', description: 'Popular value monthly' },
+			{ _id: 'v-r2', amount: 149, validity: '28 days', data: '2GB/day', calls: 'Unlimited', sms: '100/day', description: 'Recommended for streaming' },
+			{ _id: 'v-r3', amount: 199, validity: '56 days', data: '1.5GB/day', calls: 'Unlimited', sms: '100/day', description: 'Two-month saver' },
+			{ _id: 'v-u1', amount: 249, validity: '30 days', data: 'Unlimited (FUP)', calls: 'Unlimited', sms: '100/day', description: 'Unlimited monthly' },
+			{ _id: 'v-u2', amount: 399, validity: '90 days', data: 'Unlimited (FUP)', calls: 'Unlimited', sms: '100/day', description: 'Quarterly unlimited' },
+			{ _id: 'v-e1', amount: 349, validity: '30 days', data: '3GB/day', calls: 'Unlimited', sms: '100/day', description: 'Entertainment pack with OTT' },
+			{ _id: 'v-m1', amount: 119, validity: '28 days', data: '1GB/day', calls: 'Unlimited', sms: '100/day', description: 'Basic monthly plan' },
+			{ _id: 'v-y1', amount: 1299, validity: '365 days', data: '2GB/day', calls: 'Unlimited', sms: '100/day', description: 'Yearly value pack' },
+			{ _id: 'v-ro1', amount: 2599, validity: '30 days', data: '8GB roaming', calls: 'International', sms: '-', description: 'Roaming starter' },
+			{ _id: 'v-off1', amount: 49, validity: '7 days', data: '500MB/day', calls: '50 min', sms: '-', description: 'Intro offer' }
+		]
+	};
 
-  useEffect(() => {
-    window.scrollTo({ top: 0, behavior: 'instant' });
-  }, []);
+	useEffect(()=>{ if(!isAuthenticated) navigate('/login'); },[isAuthenticated,navigate]);
 
-  useEffect(() => {
-    const fetchOperator = async () => {
-      try {
-        const response = await fetch('http://localhost:5000/api/v1/operators');
-        const resJson = await response.json();
-        const operators = resJson?.data || resJson;
-        const viOperator = Array.isArray(operators) ? operators.find(op => op.name === 'Vi') : null;
-        if (viOperator) {
-          setOperator(viOperator);
-        }
-      } catch (error) {
-        console.error('Error fetching operator:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
+	useEffect(()=>{
+		const fetchOp=async()=>{ setLoading(true); try{ const res=await fetch('http://localhost:5000/api/v1/operators'); const json=await res.json(); const ops=json?.data||json; const found=Array.isArray(ops)?ops.find(o=>o.name==='Vi'):null; setOperator(found||fallbackPlans);}catch(e){ setOperator(fallbackPlans);}finally{setLoading(false)} };
+		fetchOp();
+	},[]);
 
-    fetchOperator();
-  }, []);
+	const categorizePlans = (plans) => {
+		if(!plans) return {};
+		const categorized={recommended:[],unlimited:[],entertainment:[],monthly:[],yearly:[],roaming:[],special:[],all:plans};
+		plans.forEach(plan=>{ const amt=Number(plan.amount); const desc=(plan.description||'').toLowerCase(); const dataStr=(plan.data||'').toLowerCase(); if(plan._id&&plan._id.includes('off')) categorized.special.push(plan); if([99,119,149].includes(amt)) categorized.recommended.push(plan); if(desc.includes('unlimited')||dataStr.includes('unlimited')) categorized.unlimited.push(plan); if(desc.includes('ott')||desc.includes('entertain')||desc.includes('streaming')||(amt>=300&&amt<800)) categorized.entertainment.push(plan); if(amt<300&&plan.validity&&(plan.validity.includes('28')||plan.validity.includes('56')||plan.validity.includes('30'))) categorized.monthly.push(plan); if(plan.validity&&plan.validity.includes('365')) categorized.yearly.push(plan); if(desc.includes('roam')||desc.includes('international')||amt>=2000) categorized.roaming.push(plan); });
+		return categorized;
+	};
 
-  // Categorize plans based on amount ranges
-  const categorizePlans = (plans) => {
-    if (!plans) return {};
-    
-    const categorized = {
-      recommended: [],
-      unlimited: [],
-      movie: [],
-      cricket: [],
-      monthly: [],
-      yearly: [],
-      roaming: [],
-      all: plans
-    };
+	const rechargePacks = operator ? categorizePlans(operator.plans) : {};
+	const filteredPacks = rechargePacks[selectedCategory] ? rechargePacks[selectedCategory].filter(pack=> pack.amount.toString().includes(searchQuery) || (pack.description||'').toLowerCase().includes(searchQuery.toLowerCase())) : [];
+	const displayCategories = ['recommended','unlimited','entertainment','monthly','yearly','roaming','special','all'];
 
-    plans.forEach(plan => {
-      // Recommended plans (most popular amounts)
-      if ([179, 359, 539].includes(plan.amount)) {
-        categorized.recommended.push(plan);
-      }
-      
-      // Unlimited plans (focus on calls)
-      if ([199, 249, 449, 719].includes(plan.amount)) {
-        categorized.unlimited.push(plan);
-      }
-      
-      // Movie plans (entertainment focused)
-      if ([299, 399, 599, 899].includes(plan.amount)) {
-        categorized.movie.push(plan);
-      }
-      
-      // Cricket plans (sports focused)
-      if ([269, 439, 639].includes(plan.amount)) {
-        categorized.cricket.push(plan);
-      }
-      
-      // Monthly plans (standard monthly)
-      if ([179, 249, 319, 479].includes(plan.amount)) {
-        categorized.monthly.push(plan);
-      }
-      
-      // Yearly plans (long validity)
-      if ([1999, 3199, 4299].includes(plan.amount)) {
-        categorized.yearly.push(plan);
-      }
-      
-      // Roaming plans (international)
-      if ([2799, 4899, 1399, 7999].includes(plan.amount)) {
-        categorized.roaming.push(plan);
-      }
-    });
+	const handleRecharge=(pack)=>{ if(!mobileNumber){ alert('Please enter mobile number'); return } if(mobileNumber.length!==10||!/^\d{10}$/.test(mobileNumber)){ alert('Enter a valid 10-digit number'); return } const rechargeDetails={...pack,mobileNumber,operator:'Vi',operatorId:operator?._id,planId:pack._id}; if(typeof onRechargeInitiate==='function') onRechargeInitiate(rechargeDetails); navigate('/payment',{state:rechargeDetails}); };
 
-    return categorized;
-  };
+		if (!isAuthenticated) return null;
 
-  const rechargePacks = operator ? categorizePlans(operator.plans) : {};
+		return (
+			<div className="operator-page vi-page">
+				<header className="operator-navbar">
+					<div className="navbar-container">
+						<div className="operator-logo">
+							<img src={ViLogo} alt="Vi" />
+							<div className="operator-meta">
+								<div className="operator-title">Vi</div>
+								<div className="operator-sub">Prepaid · Postpaid · Broadband</div>
+							</div>
+						</div>
 
-  const handleRecharge = (pack) => {
-    if (!mobileNumber) {
-      alert('Please enter mobile number');
-      return;
-    }
-    
-    const rechargeDetails = {
-      ...pack,
-      mobileNumber: mobileNumber,
-      operator: 'Vi',
-      operatorId: operator._id,
-      planId: pack._id
-    };
-    
-    onRechargeInitiate(rechargeDetails);
-    navigate('/payment', { state: rechargeDetails });
-  };
+						<nav className="nav-menu" aria-label="Main menu">
+							<button className="nav-btn">Offers</button>
+							<button className="nav-btn">Plans</button>
+							<button className="nav-btn">Help</button>
+						</nav>
 
-  const filteredPacks = rechargePacks[selectedCategory] ? rechargePacks[selectedCategory].filter(pack =>
-    pack.amount.toString().includes(searchQuery) ||
-    pack.description.toLowerCase().includes(searchQuery.toLowerCase())
-  ) : [];
+						<div className="profile-section">
+							<div className="profile-icon">{currentUser ? currentUser.charAt(0).toUpperCase() : 'U'}</div>
+							<div className="profile-name">{currentUser || 'User'}</div>
+						</div>
+					</div>
+				</header>
 
-  if (!isAuthenticated) {
-    return null;
-  }
+				<main className="main-content">
+					<aside className="left-panel">
+						<div className="mobile-input-section">
+							<h3>Mobile number</h3>
+							<div className="input-group">
+								<div className="country-code">+91</div>
+								<input
+									className="mobile-input"
+									type="tel"
+									value={mobileNumber}
+									onChange={e => setMobileNumber(e.target.value.replace(/\D/g, ''))}
+									maxLength={10}
+									placeholder="Enter 10-digit mobile"
+								/>
+							</div>
+						</div>
 
-  if (loading) {
-    return (
-      <div className="vi-page">
-        <div className="loading">Loading Vi plans...</div>
-      </div>
-    );
-  }
+						<div className="search-section">
+							<h3>Search packs</h3>
+							<div className="search-group">
+								<input className="search-input" value={searchQuery} onChange={e => setSearchQuery(e.target.value)} placeholder="Search amount or description" />
+								<button className="search-btn">Search</button>
+							</div>
+						</div>
+					</aside>
 
-  if (!operator) {
-    return (
-      <div className="vi-page">
-        <div className="error">Error loading operator data</div>
-      </div>
-    );
-  }
+					<section className="right-panel">
+						<div className="special-offers">
+							<h4>Special Offers</h4>
+							<div>
+								{(rechargePacks.special || []).slice(0, 4).map(o => (
+									<button key={o._id} className="offer-pill">₹{o.amount} · {o.description}</button>
+								))}
+							</div>
+						</div>
 
-  return (
-    <div className="vi-page">
-      <nav className="operator-navbar">
-        <div className="navbar-container">
-          <div className="operator-logo">
-            <img src={ViLogo} alt="Vi" className="vi-logo" />
-          </div>
-          <div className="nav-menu">
-            <div className="dropdown">
-              <button className="dropdown-btn">Vi Fiber</button>
-              <div className="dropdown-content">
-                <a href="#">Broadband Plans</a>
-                <a href="#">New Connection</a>
-                <a href="#">Bill Payment</a>
-              </div>
-            </div>
-            <div className="dropdown">
-              <button className="dropdown-btn">Postpaid</button>
-              <div className="dropdown-content">
-                <a href="#">Monthly Plans</a>
-                <a href="#">Bill Payment</a>
-                <a href="#">New Connection</a>
-              </div>
-            </div>
-            <div className="dropdown">
-              <button className="dropdown-btn">Prepaid</button>
-              <div className="dropdown-content">
-                <a href="#">Recharge Plans</a>
-                <a href="#">Special Offers</a>
-                <a href="#">Port to Vi</a>
-              </div>
-            </div>
-          </div>
-          <div className="profile-section">
-            <div className="profile-icon">
-              {currentUser ? currentUser.charAt(0).toUpperCase() : 'U'}
-            </div>
-            <span className="profile-name">{currentUser}</span>
-          </div>
-        </div>
-      </nav>
+						<div className="pack-categories">
+							{displayCategories.map(cat => (
+								<button key={cat} className={selectedCategory === cat ? 'cat active' : 'cat'} onClick={() => setSelectedCategory(cat)}>
+									{cat.charAt(0).toUpperCase() + cat.slice(1)} <span className="count">{(rechargePacks[cat] || []).length}</span>
+								</button>
+							))}
+						</div>
 
-      <div className="main-content">
-        <div className="left-panel">
-          <div className="mobile-input-section">
-            <h3>📱 Enter Mobile Number</h3>
-            <div className="input-group">
-              <div className="country-code">🇮🇳 +91</div>
-              <input
-                type="tel"
-                value={mobileNumber}
-                onChange={(e) => setMobileNumber(e.target.value)}
-                placeholder="Enter 10-digit mobile number"
-                maxLength="10"
-                className="mobile-input"
-              />
-            </div>
-          </div>
+						<div className="packs-grid">
+							{loading ? (
+								<div className="loading">Loading plans…</div>
+							) : (
+								filteredPacks.length === 0 ? (
+									<div className="empty">No plans match your search.</div>
+								) : (
+									filteredPacks.map(pack => (
+										<article key={pack._id} className="pack-card">
+											<header className="pack-card-header">
+												<div className="pack-amount">{pack.amount}</div>
+												<div className="pack-validity">{pack.validity || '—'}</div>
+											</header>
 
-          <div className="search-section">
-            <h3>🔍 Search Packs</h3>
-            <div className="search-group">
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search by amount or description"
-                className="search-input"
-              />
-              <button className="search-btn">Search</button>
-            </div>
-          </div>
-        </div>
+											<div className="pack-details">
+												<div className="pack-data">{pack.data || '—'}</div>
+												<div className="pack-calls">{pack.calls || '—'}</div>
+												<div className="pack-sms">{pack.sms || '—'}</div>
+												<div className="pack-description">{pack.description}</div>
+											</div>
 
-        <div className="right-panel">
-          <div className="pack-categories">
-            {Object.keys(rechargePacks).map((key) => (
-              <button
-                key={key}
-                className={selectedCategory === key ? 'active' : ''}
-                onClick={() => setSelectedCategory(key)}
-              >
-                {key.charAt(0).toUpperCase() + key.slice(1).replace(/([A-Z])/g, ' $1')}
-              </button>
-            ))}
-          </div>
-
-          <div className="packs-grid">
-            {filteredPacks.map((pack, index) => (
-              <div key={index} className="pack-card">
-                <div className="pack-amount">₹{pack.amount}</div>
-                <div className="pack-details">
-                  <div className="pack-validity">Validity: {pack.validity}</div>
-                  <div className="pack-data">Data: {pack.data}</div>
-                  <div className="pack-calls">Calls: {pack.calls}</div>
-                  <div className="pack-sms">SMS: {pack.sms}</div>
-                </div>
-                <div className="pack-description">{pack.description}</div>
-                <button className="recharge-btn" onClick={() => handleRecharge(pack)}>
-                  Recharge Now
-                </button>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
+											<footer className="pack-card-footer">
+												<button className="recharge-btn" onClick={() => handleRecharge(pack)}>Recharge</button>
+												<button className="details-btn nav-btn" onClick={() => alert(pack.description)}>Details</button>
+											</footer>
+										</article>
+									))
+								)
+							)}
+						</div>
+					</section>
+				</main>
+			</div>
+		);
 };
 
 export default Vi;
