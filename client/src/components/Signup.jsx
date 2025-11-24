@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
+import { z } from 'zod';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button, Card, ErrorMessage } from './common';
-import { toast } from '../utils/toast';
 import './Signup.css';
+import { useAuth } from '../contexts/authContext';
 
-const Signup = ({ onSignup }) => {
+const Signup = () => {
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
@@ -13,6 +14,7 @@ const Signup = ({ onSignup }) => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { register } = useAuth();
 
   const validateUsername = (username) => {
     const specialCharRegex = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/;
@@ -32,63 +34,36 @@ const Signup = ({ onSignup }) => {
   const handleSignup = async (e) => {
     e.preventDefault();
     setError('');
+    // Validate with Zod schema
+    const schema = z.object({
+      name: z.string().min(3, 'Username must be at least 3 characters'),
+      email: z.string().email('Invalid email address'),
+      phone: z.string().regex(/^\d{10}$/, 'Phone must be 10 digits'),
+      password: z.string().min(8, 'Password must be at least 8 characters').regex(/(?=.*[A-Z])(?=.*\d)/, 'Password must include an uppercase letter and a number'),
+      confirmPassword: z.string().min(1)
+    }).refine(data => data.password === data.confirmPassword, { message: 'Passwords do not match', path: ['confirmPassword'] });
 
-    if (!username.trim() || !email.trim() || !phone.trim() || !password.trim()) {
-      setError('Please fill in all fields');
-      return;
-    }
-    if (!validateUsername(username.trim())) {
-      setError('Username must be at least 6 characters and contain special characters (!@#$%^&*()_+-=[]{}|;:"\\,.<>?)');
-      return;
-    }
-    if (!validateEmail(email.trim())) {
-      setError('Email must be a valid @gmail.com address');
-      return;
-    }
-    if (phone.length !== 10 || !/^\d+$/.test(phone)) {
-      setError('Please enter a valid 10-digit phone number');
-      return;
-    }
-    if (!validatePassword(password)) {
-      setError('Password must be at least 6 characters and contain both letters and numbers');
-      return;
-    }
-    if (password !== confirmPassword) {
-      setError('Passwords do not match');
+    const payload = { name: username.trim(), email: email.trim(), phone: phone.trim(), password, confirmPassword };
+    const parsed = schema.safeParse(payload);
+    if (!parsed.success) {
+      setError(parsed.error.errors[0].message);
       return;
     }
 
     setLoading(true);
     try {
-      const response = await fetch('http://localhost:5000/api/v1/auth/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: username.trim(),
-          email: email.trim(),
-          phone: phone.trim(),
-          password: password.trim()
-        })
-      });
-      const data = await response.json();
-      if (!response.ok) {
-        const errorMsg = data.msg || 'Registration failed';
-        setError(errorMsg);
-        toast.error(errorMsg);
-        return;
+      const payload = {
+        name: username.trim(),
+        email: email.trim(),
+        phone: phone.trim(),
+        password: password.trim(),
+      };
+      const resp = await register(payload);
+      if (resp.ok) {
+        navigate('/');
+      } else {
+        setError(resp.message || 'Registration failed');
       }
-      // Save token and user to localStorage
-      const token = data?.data?.token;
-      const user = data?.data?.user;
-      if (token) localStorage.setItem('token', token);
-      if (user) localStorage.setItem('user', JSON.stringify(user));
-      toast.success('Account created successfully! Welcome aboard.');
-      onSignup(user?.name || username.trim());
-      navigate('/');
-    } catch (err) {
-      const errorMsg = 'Server error. Please try again.';
-      setError(errorMsg);
-      toast.error(errorMsg);
     } finally {
       setLoading(false);
     }

@@ -1,7 +1,11 @@
 // Airtel.jsx
 import React, { useState, useEffect } from 'react';
+import api from '../utils/api';
+import LoadingSkeleton from './LoadingSkeleton';
 import { useNavigate } from 'react-router-dom';
 import './Airtel.css';
+import { z } from 'zod';
+import { toast } from '../utils/toast';
 
 const Airtel = ({ isAuthenticated, currentUser, onRechargeInitiate }) => {
   const [mobileNumber, setMobileNumber] = useState('');
@@ -62,18 +66,12 @@ const Airtel = ({ isAuthenticated, currentUser, onRechargeInitiate }) => {
   };
 
   useEffect(() => {
-    if (!isAuthenticated) navigate('/login');
-  }, [isAuthenticated, navigate]);
-
-  useEffect(() => {
     const fetchOperator = async () => {
       setLoading(true);
       setError('');
       try {
-        const response = await fetch('http://localhost:5000/api/v1/operators');
-        if (!response.ok) throw new Error('Failed to fetch operators');
-        const resJson = await response.json();
-        const operators = resJson?.data || resJson;
+        const res = await api.get('/api/v1/operators');
+        const operators = res?.data?.data || res?.data || [];
         const airtelOperator = Array.isArray(operators) ? operators.find(op => op.name === 'Airtel') : null;
         setOperator(airtelOperator || fallbackPlans);
       } catch (err) {
@@ -163,12 +161,10 @@ const Airtel = ({ isAuthenticated, currentUser, onRechargeInitiate }) => {
   const displayCategories = ['recommended','unlimited','entertainment','monthly','yearly','roaming','special','all'];
 
   const handleRecharge = (pack) => {
-    if (!mobileNumber) {
-      alert('Please enter mobile number');
-      return;
-    }
-    if (mobileNumber.length !== 10 || !/^\d{10}$/.test(mobileNumber)) {
-      alert('Enter a valid 10-digit number');
+    const schema = z.object({ mobileNumber: z.string().regex(/^\d{10}$/, 'Enter a valid 10-digit mobile number') });
+    const v = schema.safeParse({ mobileNumber });
+    if (!v.success) {
+      toast.error(v.error.errors[0].message);
       return;
     }
     const rechargeDetails = { ...pack, mobileNumber, operator: 'Airtel', operatorId: operator._id, planId: pack._id };
@@ -253,7 +249,7 @@ const Airtel = ({ isAuthenticated, currentUser, onRechargeInitiate }) => {
 
           <div className="packs-grid">
             {loading ? (
-              <div className="loading">Loading plans…</div>
+              <LoadingSkeleton rows={6} height={80} />
             ) : (
               filteredPacks.length === 0 ? (
                 <div className="empty">No plans match your search.</div>

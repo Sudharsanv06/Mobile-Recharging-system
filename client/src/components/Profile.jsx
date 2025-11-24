@@ -1,6 +1,8 @@
 import React, { useEffect, useMemo, useState, useRef } from 'react';
-import { Button, LoadingSpinner, ErrorMessage } from './common';
+import { Button, LoadingSpinner } from './common';
 import { toast } from '../utils/toast';
+import RetryFallback from './RetryFallback';
+import api from '../utils/api';
 import HistoryCard from './common/HistoryCard';
 import StatsCard from './common/StatsCard';
 import './Profile.css';
@@ -34,18 +36,12 @@ const Profile = ({ currentUser }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filter]);
 
-  const apiBase = process.env.REACT_APP_API_BASE || '';
-
   const loadProfile = async () => {
     setLoading(true);
     setError('');
     try {
-      const token = localStorage.getItem('token');
-      const res = await fetch(`${apiBase}/api/v1/users/profile`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      if (!res.ok) throw new Error('Failed to load profile');
-      const data = await res.json();
+      const res = await api.get('/api/v1/users/profile');
+      const data = res?.data?.data || res?.data || null;
       setUser(data);
     } catch (err) {
       console.error(err);
@@ -59,18 +55,14 @@ const Profile = ({ currentUser }) => {
   const loadHistory = async (pageToLoad = 1, operator = 'All', replace = false) => {
     if (loadingMore) return;
     if (pageToLoad === 1) setLoadingMore(true);
-    const token = localStorage.getItem('token');
     try {
       const q = new URLSearchParams();
       q.set('page', pageToLoad);
       q.set('limit', 10);
       if (operator && operator !== 'All') q.set('operator', operator);
-      const res = await fetch(`${apiBase}/api/v1/users/recharges?${q.toString()}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      if (!res.ok) throw new Error('Failed to load history');
-      const json = await res.json();
-      const items = Array.isArray(json.data) ? json.data : json;
+      const res = await api.get(`/api/v1/users/recharges?${q.toString()}`);
+      const json = res?.data || {};
+      const items = Array.isArray(json.data) ? json.data : (Array.isArray(json) ? json : (json.data || []));
       setHasMore((json.meta && json.meta.page < json.meta.pages) || items.length === 10);
       setHistory(prev => (replace ? items : [...prev, ...items]));
       setPage(pageToLoad);
@@ -127,7 +119,13 @@ const Profile = ({ currentUser }) => {
   };
 
   if (loading) return <div className="profile"><LoadingSpinner fullscreen text="Loading profile..." /></div>;
-  if (error) return <div className="profile"><ErrorMessage message={error} onRetry={loadProfile} /></div>;
+  if (error) return (
+    <div className="profile">
+      <div style={{ maxWidth: 720, margin: '24px auto' }}>
+        <RetryFallback message={error} onRetry={loadProfile} />
+      </div>
+    </div>
+  );
 
   return (
     <div className="profile profile-premium" ref={containerRef}>

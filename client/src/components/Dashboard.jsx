@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import './Dashboard.css';
 import WalletModal from './WalletModal';
+import api from '../utils/api';
+import LoadingSkeleton from './LoadingSkeleton';
+import RetryFallback from './RetryFallback';
 
 const Dashboard = ({ onOpenWallet, balanceUpdated }) => {
   const [profile, setProfile] = useState(null);
@@ -8,6 +11,7 @@ const Dashboard = ({ onOpenWallet, balanceUpdated }) => {
   const [recharges, setRecharges] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showWallet, setShowWallet] = useState(false);
+  const [error, setError] = useState('');
 
   const token = localStorage.getItem('token');
 
@@ -15,23 +19,24 @@ const Dashboard = ({ onOpenWallet, balanceUpdated }) => {
 
   useEffect(() => {
     if (!token) return;
-    const headers = { Authorization: `Bearer ${token}` };
-
     const fetchAll = async () => {
       try {
         setLoading(true);
         const [pRes, sRes, rRes] = await Promise.all([
-          fetch('http://localhost:5000/api/v1/users/profile', { headers }),
-          fetch('http://localhost:5000/api/v1/users/stats', { headers }),
-          fetch('http://localhost:5000/api/v1/users/recharges', { headers })
+          api.get('/api/v1/users/profile'),
+          api.get('/api/v1/users/stats'),
+          api.get('/api/v1/users/recharges')
         ]);
 
-        const [pData, sData, rData] = await Promise.all([pRes.json(), sRes.json(), rRes.json()]);
-        if (pRes.ok) setProfile(pData);
-        if (sRes.ok) setStats(sData);
-        if (rRes.ok) setRecharges(rData.slice(0, 10));
+        const pData = pRes?.data?.data || pRes?.data || null;
+        const sData = sRes?.data?.data || sRes?.data || null;
+        const rData = rRes?.data?.data || rRes?.data || [];
+        if (pData) setProfile(pData);
+        if (sData) setStats(sData);
+        if (rData) setRecharges(Array.isArray(rData) ? rData.slice(0, 10) : []);
       } catch (err) {
-        // ignore - show empty
+        console.error('Dashboard fetch failed', err);
+        setError('Unable to load dashboard data');
       } finally {
         setLoading(false);
       }
@@ -43,6 +48,11 @@ const Dashboard = ({ onOpenWallet, balanceUpdated }) => {
     window.addEventListener('balanceUpdated', onBalance);
     return () => window.removeEventListener('balanceUpdated', onBalance);
   }, [token, refreshKey, balanceUpdated]);
+
+  const retry = () => {
+    setError('');
+    setRefreshKey(k => k + 1);
+  };
 
   const amountsForChart = recharges.slice(0, 6).map(r => r.amount).reverse();
 
@@ -63,6 +73,11 @@ const Dashboard = ({ onOpenWallet, balanceUpdated }) => {
         </div>
       </div>
 
+      {error ? (
+        <div style={{ padding: 24 }}>
+          <RetryFallback message={error} onRetry={retry} />
+        </div>
+      ) : (
       <div className="dashboard-cards">
         <div className="card">
           <div className="card-title">Total Recharges</div>
@@ -91,11 +106,12 @@ const Dashboard = ({ onOpenWallet, balanceUpdated }) => {
           </div>
         </div>
       </div>
+      )}
 
       <div className="recent-list">
         <h3>Latest Recharges</h3>
         {loading ? (
-          <div className="loading">Loading...</div>
+          <LoadingSkeleton rows={6} height={56} />
         ) : (
           <ul>
             {recharges.map((r) => (

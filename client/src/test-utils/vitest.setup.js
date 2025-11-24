@@ -24,3 +24,27 @@ vi.mock('axios', () => ({ default: mockAxios }));
 
 // Any other global test setup can go here
 // e.g., global.fetch polyfills, global mocks, etc.
+
+// Some libraries (e.g. html2canvas) call window.getComputedStyle with
+// pseudo-element arguments or in ways that older jsdom versions don't
+// implement. Provide a forgiving fallback so tests don't throw.
+if (typeof window !== 'undefined') {
+  const originalGetComputedStyle = window.getComputedStyle;
+  window.getComputedStyle = (elt, pseudoElt) => {
+    try {
+      if (typeof originalGetComputedStyle === 'function') {
+        return originalGetComputedStyle.call(window, elt, pseudoElt);
+      }
+    } catch (e) {
+      // fall through to return a minimal stub below
+    }
+    return {
+      getPropertyValue: () => '',
+    };
+  };
+  // Some code calls `window.computedStyle` (not a standard) — mirror it.
+  // This prevents jsdom from throwing "Not implemented: window.computedStyle"
+  // when libraries use that non-standard name.
+  // eslint-disable-next-line no-undef
+  window.computedStyle = window.getComputedStyle;
+}

@@ -1,292 +1,400 @@
-import React, { useState, useEffect } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
-import { Button, LoadingSpinner } from "./common";
-import "./Payment.css";
-import MobileVerification from "./MobileVerification";
-import { toast } from "../utils/toast";
+﻿import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { Button, Card, LoadingSpinner, ErrorMessage } from './common';
+import './Payment.css';
+import { toast } from '../utils/toast';
+import api from '../utils/api';
+import { z } from 'zod';
 
-const Payment = ({ isAuthenticated, currentUser, rechargeDetails: propRechargeDetails }) => {
+export default function Payment({ rechargeDetails: propRechargeDetails }) {
   const navigate = useNavigate();
   const location = useLocation();
-
-  const rechargeDetails = propRechargeDetails || location.state || {
-    amount: "239",
-    mobileNumber: "1111111111",
-    operator: "Jio",
-    validity: "28 days",
-    data: "2GB/day",
-    calls: "Unlimited",
-    sms: "100/day",
-    email: "user@example.com",
-  };
-
-  const [selectedPayment, setSelectedPayment] = useState("");
-  const [showCardForm, setShowCardForm] = useState(false);
-  const [showUPIForm, setShowUPIForm] = useState(false);
-  const [showNetBankingForm, setShowNetBankingForm] = useState(false);
+  const rechargeDetails = propRechargeDetails || location.state || {};
+  
+  const [mobileNumber, setMobileNumber] = useState(rechargeDetails.mobileNumber || '');
   const [isProcessing, setIsProcessing] = useState(false);
+  const [error, setError] = useState(null);
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState('wallet');
+  const [operator, setOperator] = useState(null);
+  const [loadingOperator, setLoadingOperator] = useState(false);
+  const [razorpayLoaded, setRazorpayLoaded] = useState(false);
+  const [currentRechargeId, setCurrentRechargeId] = useState(null);
 
-  const [cardDetails, setCardDetails] = useState({
-    number: "",
-    name: "",
-    expiry: "",
-    cvv: "",
-  });
-
-  const [upiId, setUpiId] = useState("");
-  const [selectedBank, setSelectedBank] = useState("");
-  const [selectedOtherUPI, setSelectedOtherUPI] = useState("");
-
-  const [netBankingDetails, setNetBankingDetails] = useState({
-    username: "",
-    password: "",
-    transactionPassword: "",
-  });
-
-  const [showVerification, setShowVerification] = useState(false);
-  const [isMobileVerified, setIsMobileVerified] = useState(false);
-  const [verifiedMobileNumber, setVerifiedMobileNumber] = useState("");
-
+  // Load Razorpay script
   useEffect(() => {
-    if (!isAuthenticated) {
-      navigate("/login");
+    const script = document.createElement('script');
+    script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+    script.async = true;
+    script.onload = () => setRazorpayLoaded(true);
+    document.body.appendChild(script);
+    return () => {
+      document.body.removeChild(script);
+    };
+  }, []);
+
+  // Fetch operator details if operatorId is provided
+  useEffect(() => {
+    if (rechargeDetails.operatorId && !rechargeDetails.operator) {
+      setLoadingOperator(true);
+      api.get(`/api/v1/operators/${rechargeDetails.operatorId}`)
+        .then(res => {
+          const op = res.data?.data || res.data;
+          setOperator(op);
+        })
+        .catch(err => {
+          console.warn('Could not fetch operator details:', err);
+        })
+        .finally(() => setLoadingOperator(false));
     }
-  }, [isAuthenticated, navigate]);
+  }, [rechargeDetails.operatorId]);
 
-  const paymentMethods = [
-    { id: "gpay", name: "Google Pay", icon: "GPay", type: "upi", popular: true, upiDomain: "okicici" },
-    { id: "phonepe", name: "PhonePe", icon: "PhonePe", type: "upi", popular: true, upiDomain: "ybl" },
-    { id: "paytm", name: "Paytm", icon: "Paytm", type: "upi", popular: true, upiDomain: "paytm" },
-    { id: "upi", name: "Other UPI Apps", icon: "UPI", type: "other_upi" },
-    { id: "card", name: "Credit/Debit Card", icon: "Card", type: "card" },
-    { id: "netbanking", name: "Net Banking", icon: "Bank", type: "netbanking" },
-  ];
+  const operatorName = rechargeDetails.operator || operator?.name || 'Operator';
+  const amount = parseFloat(rechargeDetails.amount || '0');
+  const operatorId = rechargeDetails.operatorId || operator?._id;
 
-  const otherUPIApps = [
-    { id: "flipkart", name: "Flipkart UPI", icon: "Flipkart", upiDomain: "flipkart" },
-    { id: "amazon", name: "Amazon Pay UPI", icon: "Amazon", upiDomain: "amazonpay" },
-    { id: "supermoney", name: "SuperMoney UPI", icon: "Super", upiDomain: "super" },
-  ];
+  const mobileSchema = z.object({
+    mobileNumber: z.string().regex(/^[0-9]{10}$/, 'Enter a valid 10-digit mobile number')
+  });
 
-  const banks = [
-    "State Bank of India",
-    "HDFC Bank",
-    "ICICI Bank",
-    "Axis Bank",
-    "Punjab National Bank",
-    "Bank of Baroda",
-    "Canara Bank",
-    "Union Bank of India",
-  ];
-
-  const handlePaymentSelect = (method) => {
-    setSelectedPayment(method.id);
-    setShowCardForm(false);
-    setShowUPIForm(false);
-    setShowNetBankingForm(false);
-    setSelectedOtherUPI("");
-    setUpiId("");
-
-    if (method.type === "card") setShowCardForm(true);
-    if (method.type === "upi") setShowUPIForm(true);
-    if (method.type === "other_upi") setShowUPIForm(true);
-    if (method.type === "netbanking") setShowNetBankingForm(true);
-  };
-
-  const validateForm = () => {
-    if (!selectedPayment) {
-      toast.warning("Please select a payment method");
-      return false;
+  const handleRazorpayPayment = async (rechargeId) => {
+    if (!razorpayLoaded || !window.Razorpay) {
+      toast.error('Payment gateway not loaded. Please refresh the page.');
+      return;
     }
-    return true;
-  };
-
-  const handlePayment = async () => {
-    if (!validateForm()) return;
-
-    setIsProcessing(true);
 
     try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        toast.error('You must be logged in to complete payment.');
-        navigate('/login');
-        return;
-      }
-      
-      const res = await fetch("http://localhost:5000/api/v1/recharges", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          operatorId: rechargeDetails.operatorId,
-          mobileNumber: rechargeDetails.mobileNumber,
-          planId: rechargeDetails.planId,
-          amount: parseInt(rechargeDetails.amount),
-        }),
+      // Create Razorpay order
+      const orderRes = await api.post('/api/v1/payments/create-order', {
+        amount,
+        rechargeId,
       });
 
-      let data;
-      try {
-        data = await res.json();
-      } catch (e) {
-        console.error('Failed to parse JSON response', e);
-        toast.error('Unexpected server response');
-        return;
-      }
+      const { orderId, keyId } = orderRes.data.data;
 
-      if (!res.ok) {
-        const serverMsg = data?.message || data?.msg || 'Recharge failed';
-        console.error('Recharge error response:', data);
-        toast.error(serverMsg);
-        return;
-      }
+      const options = {
+        key: keyId,
+        amount: amount * 100, // Amount in paise
+        currency: 'INR',
+        name: 'Mobile Recharge',
+        description: `${operatorName} Recharge`,
+        order_id: orderId,
+        handler: async (response) => {
+          try {
+            // Verify payment
+            const verifyRes = await api.post('/api/v1/payments/verify', {
+              orderId: response.razorpay_order_id,
+              paymentId: response.razorpay_payment_id,
+              signature: response.razorpay_signature,
+              rechargeId,
+            });
 
-      // Success
-      const resp = data;
-      const message = resp?.message || resp?.msg || 'Payment successful';
-      const txn = resp?.data?.transactionId || '';
-      toast.success(txn ? `${message} — Txn: ${txn}` : message);
-      navigate('/receipt', { state: { recharge: resp.data } });
-    } catch (error) {
-      console.error('Payment error:', error);
-      toast.error('Payment failed. Please try again.');
-    } finally {
+            const rechargeData = verifyRes.data.data;
+            toast.success('Payment successful! Recharge completed.');
+            navigate('/success', {
+              state: {
+                recharge: {
+                  ...rechargeData,
+                  operator: operatorName,
+                  mobileNumber,
+                  amount,
+                },
+              },
+            });
+          } catch (err) {
+            toast.error('Payment verification failed');
+            setError('Payment verification failed. Please contact support.');
+          } finally {
+            setIsProcessing(false);
+          }
+        },
+        prefill: {
+          contact: mobileNumber,
+        },
+        theme: {
+          color: '#007bff',
+        },
+        modal: {
+          ondismiss: () => {
+            setIsProcessing(false);
+          },
+        },
+      };
+
+      const razorpay = new window.Razorpay(options);
+      razorpay.open();
+    } catch (err) {
+      console.error('Razorpay error:', err);
+      toast.error('Failed to initialize payment');
+      setError('Failed to initialize payment. Please try again.');
       setIsProcessing(false);
     }
   };
 
-  const handleVerificationClose = () => setShowVerification(false);
-  const handleVerificationComplete = (num) => {
-    setIsMobileVerified(true);
-    setVerifiedMobileNumber(num);
-    setShowVerification(false);
+  const handlePayment = async () => {
+    setError(null);
+    
+    // Validate mobile number
+    const validation = mobileSchema.safeParse({ mobileNumber });
+    if (!validation.success) {
+      const errorMsg = validation.error.errors[0]?.message || 'Invalid mobile number';
+      toast.error(errorMsg);
+      setError(errorMsg);
+      return;
+    }
+
+    if (!operatorId) {
+      const errorMsg = 'Operator information is missing. Please go back and select a plan.';
+      toast.error(errorMsg);
+      setError(errorMsg);
+      return;
+    }
+
+    if (amount <= 0) {
+      const errorMsg = 'Invalid recharge amount. Please select a valid plan.';
+      toast.error(errorMsg);
+      setError(errorMsg);
+      return;
+    }
+
+    setIsProcessing(true);
+    try {
+      // Create recharge first
+      const res = await api.post('/api/v1/recharges', {
+        operatorId,
+        mobileNumber,
+        amount: amount,
+        paymentMethod: selectedPaymentMethod === 'razorpay' ? 'razorpay' : 'wallet',
+      });
+      
+      const rechargeData = res?.data?.data || res?.data || {};
+      const rechargeId = rechargeData._id || rechargeData.id;
+      setCurrentRechargeId(rechargeId);
+
+      // If wallet payment, proceed directly
+      if (selectedPaymentMethod === 'wallet') {
+        toast.success('Payment successful! Recharge completed.');
+        navigate('/success', { 
+          state: { 
+            recharge: {
+              ...rechargeData,
+              operator: operatorName,
+              mobileNumber,
+              amount,
+            }
+          } 
+        });
+      } else if (selectedPaymentMethod === 'razorpay') {
+        // Handle Razorpay payment
+        await handleRazorpayPayment(rechargeId);
+        return; // Don't set processing to false here, handled in Razorpay handler
+      }
+    } catch (err) {
+      console.error('Payment error:', err);
+      const errorMsg = err?.response?.data?.message || err?.message || 'Payment failed. Please try again.';
+      toast.error(errorMsg);
+      setError(errorMsg);
+    } finally {
+      if (selectedPaymentMethod === 'wallet') {
+        setIsProcessing(false);
+      }
+    }
   };
 
-  if (!isAuthenticated) return null;
+  const handleBack = () => {
+    navigate(-1);
+  };
+
+  // Loading state
+  if (loadingOperator) {
+    return (
+      <div className="payment-page">
+        <LoadingSpinner fullscreen text="Loading payment details..." />
+      </div>
+    );
+  }
+
+  // Error state if no recharge details
+  if (!rechargeDetails || (!rechargeDetails.amount && !operatorId)) {
+    return (
+      <div className="payment-page">
+        <div className="payment-container">
+          <ErrorMessage
+            title="Missing Payment Information"
+            message="No recharge details found. Please go back and select a plan to recharge."
+            type="error"
+            onRetry={handleBack}
+          />
+          <div style={{ marginTop: '1rem', textAlign: 'center' }}>
+            <Button onClick={handleBack} variant="secondary">
+              Go Back
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  const paymentMethods = [
+    { id: 'wallet', name: 'Wallet', icon: '💳', desc: 'Pay from your wallet balance' },
+    { id: 'razorpay', name: 'Razorpay', icon: '💳', desc: 'Pay using UPI, Card, Net Banking via Razorpay' },
+  ];
 
   return (
     <div className="payment-page">
-
+      {/* Header */}
       <div className="payment-header">
-        <button className="back-btn" onClick={() => navigate(-1)}>
-          ← Back
-        </button>
-        <h1>Complete Payment</h1>
-        <div className="security-badge">Secure</div>
+        <div>
+          <h1>Complete Payment</h1>
+        </div>
+        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+          <button className="back-btn" onClick={handleBack}>
+            ← Back
+          </button>
+          <div className="security-badge">🔒 Secure Payment</div>
+        </div>
       </div>
 
+      {/* Main Container */}
       <div className="payment-container">
         <div className="payment-content">
-
+          {/* Order Summary */}
           <div className="order-summary">
             <h2>Order Summary</h2>
-
             <div className="summary-card">
-
+              {/* Operator Info */}
               <div className="operator-info">
-                <div className="operator-logo">{rechargeDetails.operator}</div>
-
+                <div className="operator-logo">
+                  {operatorName.charAt(0).toUpperCase()}
+                </div>
                 <div className="operator-details">
-                  <h3>{rechargeDetails.operator}</h3>
-                  <div className="mt-2">
-                    <button className="px-3 py-2 border rounded">Select recipient</button>
-                    <div className="text-sm text-gray-600 mt-2">Or choose saved recipient</div>
-                    <div className="mt-2">Current: {rechargeDetails.mobileNumber}</div>
-                  </div>
+                  <h3>{operatorName}</h3>
+                  <div className="text-sm">Mobile Recharge</div>
                 </div>
               </div>
 
+              {/* Plan Details */}
               <div className="plan-details">
-                <div className="plan-amount">₹{rechargeDetails.amount}</div>
+                <div className="plan-amount">₹{amount.toFixed(2)}</div>
                 <div className="plan-info">
-                  <div>Validity: {rechargeDetails.validity}</div>
-                  <div>Data: {rechargeDetails.data}</div>
-                  <div>Calls: {rechargeDetails.calls}</div>
-                  <div>SMS: {rechargeDetails.sms}</div>
+                  {rechargeDetails.validity && (
+                    <div>Validity: {rechargeDetails.validity}</div>
+                  )}
+                  {rechargeDetails.data && (
+                    <div>Data: {rechargeDetails.data}</div>
+                  )}
+                  {rechargeDetails.calls && (
+                    <div>Calls: {rechargeDetails.calls}</div>
+                  )}
+                  {rechargeDetails.description && (
+                    <div>{rechargeDetails.description}</div>
+                  )}
                 </div>
               </div>
 
+              {/* Price Breakdown */}
               <div className="price-breakdown">
                 <div className="breakdown-item">
-                  <span>Plan Amount</span>
-                  <span>₹{rechargeDetails.amount}</span>
+                  <span>Recharge Amount</span>
+                  <span>₹{amount.toFixed(2)}</span>
                 </div>
-
+                <div className="breakdown-item">
+                  <span>Processing Fee</span>
+                  <span>₹0.00</span>
+                </div>
                 <div className="breakdown-total">
                   <span>Total Amount</span>
-                  <span>₹{rechargeDetails.amount}</span>
+                  <span>₹{amount.toFixed(2)}</span>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* PAYMENT SECTION */}
+          {/* Payment Section */}
           <div className="payment-section">
-            <h2>Choose Payment Method</h2>
+            <h2>Payment Details</h2>
 
+            {/* Error Display */}
+            {error && (
+              <ErrorMessage
+                message={error}
+                type="error"
+                onDismiss={() => setError(null)}
+                onRetry={handlePayment}
+              />
+            )}
+
+            {/* Mobile Number Input */}
+            <div className="payment-form">
+              <h3>Mobile Number</h3>
+              <div className="form-group">
+                <label htmlFor="mobileNumber">Enter 10-digit mobile number</label>
+                <input
+                  id="mobileNumber"
+                  type="tel"
+                  value={mobileNumber}
+                  onChange={(e) => setMobileNumber(e.target.value.replace(/\D/g, '').slice(0, 10))}
+                  placeholder="Enter mobile number"
+                  maxLength={10}
+                  disabled={isProcessing}
+                  className="form-input"
+                />
+                <small>This number will be recharged</small>
+              </div>
+            </div>
+
+            {/* Payment Methods */}
             <div className="payment-methods">
+              <h3 style={{ marginBottom: '1rem', fontSize: '1.1rem', fontWeight: 600 }}>Select Payment Method</h3>
               {paymentMethods.map((method) => (
-                <button
+                <div
                   key={method.id}
-                  onClick={() => handlePaymentSelect(method)}
-                  className={`payment-method ${
-                    selectedPayment === method.id ? "selected" : ""
-                  }`}
+                  className={`payment-method ${selectedPaymentMethod === method.id ? 'selected' : ''}`}
+                  onClick={() => !isProcessing && setSelectedPaymentMethod(method.id)}
                 >
                   <div className="method-icon">{method.icon}</div>
                   <div className="method-info">
                     <div>{method.name}</div>
-                    <div className="method-desc">{method.description}</div>
+                    <div className="method-desc">{method.desc}</div>
                   </div>
-                  {selectedPayment === method.id && (
+                  {selectedPaymentMethod === method.id && (
                     <div className="selected-indicator">✓</div>
                   )}
-                </button>
+                </div>
               ))}
             </div>
 
-            {selectedPayment && (
-              <div className="pay-section">
-                <Button
-                  variant="primary"
-                  size="large"
-                  fullWidth
-                  loading={isProcessing}
-                  disabled={isProcessing}
-                  onClick={handlePayment}
-                >
-                  {isProcessing ? 'Processing Payment...' : `Pay ₹${rechargeDetails.amount}`}
-                </Button>
+            {/* Pay Section */}
+            <div className="pay-section">
+              <button
+                className="pay-btn"
+                onClick={handlePayment}
+                disabled={isProcessing || !mobileNumber || mobileNumber.length !== 10}
+              >
+                {isProcessing ? (
+                  <span className="processing">
+                    <span className="spinner"></span>
+                    Processing...
+                  </span>
+                ) : (
+                  `Pay ₹${amount.toFixed(2)}`
+                )}
+              </button>
 
-                <div className="security-note">
-                  <p>🔒 Your payment is secured with SSL encryption</p>
-                  <p>💳 Amount will be debited only after successful recharge</p>
-                </div>
+              <div className="security-note">
+                <p>Your payment is secured with 256-bit SSL encryption</p>
+                <p>We never store your card details</p>
+                <p>Instant recharge confirmation via SMS</p>
               </div>
-            )}
+            </div>
           </div>
         </div>
       </div>
 
+      {/* Footer */}
       <div className="payment-footer">
-        <p>
-          Need help? Contact us at <strong>support@recharge.com</strong> or call{" "}
-          <strong>1800-123-4567</strong>
-        </p>
-        <p>Copyright 2023 Recharge.com</p>
+        <p><strong>Need Help?</strong> Contact support at support@topitup.com</p>
+        <p>All transactions are secure and encrypted</p>
       </div>
-
-      {showVerification && (
-        <MobileVerification
-          onClose={handleVerificationClose}
-          onVerified={handleVerificationComplete}
-        />
-      )}
     </div>
   );
-};
-
-export default Payment;
+}

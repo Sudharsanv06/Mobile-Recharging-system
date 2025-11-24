@@ -1,5 +1,8 @@
 import React, { useState } from 'react';
 import './WalletModal.css';
+import api from '../utils/api';
+import { z } from 'zod';
+import { toast } from '../utils/toast';
 
 const WalletModal = ({ onClose }) => {
   const [amount, setAmount] = useState('');
@@ -8,28 +11,28 @@ const WalletModal = ({ onClose }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const val = parseFloat(amount);
-    if (isNaN(val) || val <= 0) return alert('Enter a valid amount');
+    const schema = z.object({ amount: z.preprocess((v) => Number(v), z.number().positive('Enter an amount greater than 0')) });
+    const parsed = schema.safeParse({ amount });
+    if (!parsed.success) {
+      toast.error(parsed.error.errors[0].message);
+      return;
+    }
+    const val = Number(amount);
     setLoading(true);
     try {
       // mock payment delay
       await new Promise((res) => setTimeout(res, 900));
-      const res = await fetch('http://localhost:5000/api/v1/users/balance', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ amount: val })
-      });
-      if (!res.ok) throw new Error('Failed');
-      const data = await res.json();
+      const res = await api.post('/api/v1/users/balance', { amount: val });
+      const data = res?.data?.data || res?.data || {};
       // Update local user cache
       const user = JSON.parse(localStorage.getItem('user') || '{}');
-      user.balance = data.balance;
+      user.balance = data.balance ?? user.balance;
       localStorage.setItem('user', JSON.stringify(user));
       // notify parent by firing storage event (useful in simple SPA)
       window.dispatchEvent(new Event('balanceUpdated'));
       onClose();
     } catch (err) {
-      alert('Payment failed — try again');
+      toast.error('Payment failed — try again');
     } finally {
       setLoading(false);
     }

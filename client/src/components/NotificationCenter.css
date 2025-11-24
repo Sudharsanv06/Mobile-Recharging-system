@@ -1,0 +1,129 @@
+.notification-center {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.notification-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.notification-filters {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.notification-filters button {
+  padding: 8px 16px;
+  border: 1px solid #ddd;
+  background: white;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.notification-filters button.active {
+  background: #007bff;
+  color: white;
+  border-color: #007bff;
+}
+
+.notifications-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.notification-item {
+  background: white;
+  padding: 15px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  border-left: 4px solid transparent;
+}
+
+.notification-item.unread {
+  border-left-color: #007bff;
+  background: #f8f9ff;
+}
+
+.notification-content {
+  flex: 1;
+}
+
+.notification-content h4 {
+  margin: 0 0 8px 0;
+  font-size: 16px;
+  color: #333;
+}
+
+.notification-content p {
+  margin: 0 0 8px 0;
+  color: #666;
+  font-size: 14px;
+}
+
+.notification-content small {
+  color: #999;
+  font-size: 12px;
+}
+
+.notification-actions-item {
+  display: flex;
+  gap: 8px;
+}
+
+.btn-mark-read,
+.btn-delete,
+.btn-mark-all {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.btn-mark-read {
+  background: #007bff;
+  color: white;
+}
+
+.btn-delete {
+  background: #dc3545;
+  color: white;
+}
+
+.btn-mark-all {
+  background: #28a745;
+  color: white;
+}
+
+.no-notifications {
+  text-align: center;
+  padding: 40px;
+  color: #999;
+}
+
+.notification-center-loading {
+  text-align: center;
+  padding: 40px;
+}
+
+@media (max-width: 768px) {
+  .notification-item {
+    flex-direction: column;
+  }
+
+  .notification-actions-item {
+    margin-top: 10px;
+    width: 100%;
+  }
+}
+

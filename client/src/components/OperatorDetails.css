@@ -25,6 +25,13 @@
   animation: fadeIn 0.5s ease;
 }
 
+.operator-header.brand-airtel { border-left: 6px solid #e60000; }
+.operator-header.brand-jio { border-left: 6px solid #d31b5d; }
+.operator-header.brand-vi { border-left: 6px solid #ff5a00; }
+.operator-header.brand-bsnl { border-left: 6px solid #0077b6; }
+.operator-logo{width:56px;height:56px;border-radius:12px;background:linear-gradient(135deg,#fff,#f3f6ff);display:flex;align-items:center;justify-content:center;font-weight:700;color:#2d3748;margin-right:12px}
+.operator-sub{color:#718096;margin:4px 0 0}
+
 .operator-title-section {
   display: flex;
   align-items: center;
@@ -43,6 +50,10 @@
   flex-direction: column;
   gap: 0.5rem;
 }
+
+.search-wrap{width:360px;max-width:48vw}
+.plan-search{width:100%;padding:0.6rem 0.9rem;border-radius:10px;border:1px solid #e6edf6;background:#fff}
+.select-row{display:flex;gap:8px;align-items:center}
 
 .filter-label {
   font-size: 0.9rem;
@@ -201,6 +212,19 @@
   white-space: nowrap;
 }
 
+.plan-tags{display:flex;gap:8px;align-items:center;margin-top:8px}
+.plan-badge{padding:6px 8px;border-radius:999px;font-weight:700;font-size:0.75rem;color:#fff}
+.badge-unlimited{background:linear-gradient(90deg,#14b8a6,#06b6d4)}
+.badge-data{background:linear-gradient(90deg,#7c3aed,#a78bfa)}
+.badge-entertainment{background:linear-gradient(90deg,#ff7b7b,#ffb86b);color:#1f2937}
+.badge-voice{background:linear-gradient(90deg,#60a5fa,#3b82f6)}
+.badge-valid{background:#eef2ff;color:#2b6cb0;padding:6px 8px;border-radius:8px;font-weight:600}
+
+.plan-card.plan-unlimited{border-left:6px solid #06b6d4}
+.plan-card.plan-data{border-left:6px solid #7c3aed}
+.plan-card.plan-entertainment{border-left:6px solid #ff7b7b}
+.plan-card.plan-voice{border-left:6px solid #3b82f6}
+
 /* Plan Details */
 .plan-details {
   display: flex;
@@ -246,6 +270,8 @@
   cursor: pointer;
   transition: all 0.3s ease;
 }
+
+.recharge-button:hover{filter:brightness(.98);transform:translateY(-2px)}
 
 .recharge-button:hover {
   transform: translateY(-2px);
@@ -360,6 +386,8 @@
   border-radius: 16px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
 }
+
+.empty-state.small{padding:2rem}
 
 .empty-state-icon {
   font-size: 4rem;

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import api from '../utils/api';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faFacebookF, faInstagram, faTwitter, faPinterestP, faYoutube } from '@fortawesome/free-brands-svg-icons';
 import './Home.css';
@@ -36,28 +37,28 @@ const Home = ({ isAuthenticated, currentUser }) => {
       id: 'airtel',
       name: 'Airtel',
       features: ['4G/5G Network', 'High-speed data', 'Free OTT subscriptions', 'Low-cost packs'],
-      path: '/airtel',
+      path: '/operators/airtel',
       logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5a/Airtel-vector-logo.svg/1200px-Airtel-vector-logo.svg.png'
     },
     {
       id: 'jio',
       name: 'Jio',
       features: ['Affordable plans', 'Nationwide 4G', 'Free Jio apps', 'Unlimited calling'],
-      path: '/jio',
+      path: '/operators/jio',
       logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/95/Reliance_Jio_Logo_%28October_2015%29.svg/1200px-Reliance_Jio_Logo_%28October_2015%29.svg.png'
     },
     {
       id: 'vi',
       name: 'Vi (Vodafone Idea)',
       features: ['Double data', 'Weekend data rollover', 'Vi Movies & TV', 'Truly unlimited calls'],
-      path: '/vi',
+      path: '/operators/vi',
       logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/7e/Vi_logo.svg/1200px-Vi_logo.svg.png'
     },
     {
       id: 'bsnl',
       name: 'BSNL',
       features: ['Government-backed', 'Wider rural coverage', 'Low-cost plans', 'Stable network'],
-      path: '/bsnl',
+      path: '/operators/bsnl',
       logo: 'https://upload.wikimedia.org/wikipedia/en/thumb/5/53/BSNL_Logo.svg/1200px-BSNL_Logo.svg.png'
     }
   ];
@@ -70,11 +71,28 @@ const Home = ({ isAuthenticated, currentUser }) => {
     return () => clearInterval(interval);
   }, [offers.length]);
 
-  const handleOperatorClick = (operatorPath) => {
-    if (!isAuthenticated) {
-      alert('Please login to access operator services');
-      navigate('/login');
-      return;
+  const handleOperatorClick = async (operatorPath) => {
+    // Try to map human-friendly path (slug/id) to backend _id before navigating.
+    // This avoids backend CastToObjectId errors when the backend expects ObjectId.
+    try {
+      const slug = operatorPath.split('/').pop();
+      const res = await api.get('/api/v1/operators');
+      const list = res.data?.data || res.data || [];
+      const match = list.find(op => {
+        if (!op) return false;
+        const idMatch = (op._id || '').toString() === slug;
+        const nameMatch = (op.name || '').toLowerCase() === slug.toLowerCase();
+        const slugMatch = (op.slug || '').toLowerCase() === slug.toLowerCase();
+        return idMatch || nameMatch || slugMatch;
+      });
+      if (match) {
+        // prefer slug for clean URLs; fall back to _id if slug missing
+        navigate(`/operators/${match.slug || match._id}`);
+        return;
+      }
+    } catch (err) {
+      // ignore and fallback to the original path
+      console.warn('Operator lookup failed, falling back to path', err && err.message);
     }
     navigate(operatorPath);
   };
@@ -87,9 +105,7 @@ const Home = ({ isAuthenticated, currentUser }) => {
         <div className="hero-content">
           <h1>Welcome to Top It Up</h1>
           <p>Enjoy lightning-fast, secure and rewarding mobile recharges</p>
-          <div style={{marginTop:12}}>
-            <button className="primary-cta" onClick={() => navigate('/profile')}>View Profile</button>
-          </div>
+          {/* removed View Profile button to simplify hero */}
         </div>
       </section>
 
