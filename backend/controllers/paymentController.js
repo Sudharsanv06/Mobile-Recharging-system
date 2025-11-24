@@ -134,6 +134,22 @@ exports.verifyPayment = async (req, res) => {
 
     await recharge.save();
 
+    // Emit real-time event
+    emitToUser(recharge.user.toString(), 'recharge:status_changed', {
+      rechargeId: recharge._id,
+      status: recharge.status,
+      amount: recharge.amount,
+      transactionId: recharge.transactionId,
+    });
+
+    // Create notification
+    await createAndEmitNotification(recharge.user.toString(), {
+      title: 'Payment Successful',
+      body: `Your payment of ₹${recharge.amount} was successful. Recharge completed.`,
+      type: 'recharge',
+      meta: { rechargeId: recharge._id, transactionId: recharge.transactionId },
+    });
+
     res.json({
       success: true,
       message: 'Payment verified successfully',
