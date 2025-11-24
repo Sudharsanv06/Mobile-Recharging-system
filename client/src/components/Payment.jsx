@@ -5,6 +5,7 @@ import './Payment.css';
 import { toast } from '../utils/toast';
 import api from '../utils/api';
 import { z } from 'zod';
+import { useAuth } from '../contexts/authContext';
 
 export default function Payment({ rechargeDetails: propRechargeDetails }) {
   const navigate = useNavigate();
@@ -19,6 +20,7 @@ export default function Payment({ rechargeDetails: propRechargeDetails }) {
   const [loadingOperator, setLoadingOperator] = useState(false);
   const [razorpayLoaded, setRazorpayLoaded] = useState(false);
   const [currentRechargeId, setCurrentRechargeId] = useState(null);
+  const { refreshProfile } = useAuth();
 
   // Load Razorpay script
   useEffect(() => {
@@ -70,6 +72,43 @@ export default function Payment({ rechargeDetails: propRechargeDetails }) {
       });
 
       const { orderId, keyId } = orderRes.data.data;
+
+      // If backend returned a development/mock order, simulate the checkout
+      const isDevMock = (orderId && orderId.startsWith('order_mock_')) || keyId === 'rzp_test_mock';
+
+      if (isDevMock) {
+        // Simulate successful payment in dev: directly call verify endpoint
+        try {
+          const mockPaymentId = `pay_mock_${Date.now()}`;
+          const mockSignature = 'mock_signature';
+          const verifyRes = await api.post('/api/v1/payments/verify', {
+            orderId,
+            paymentId: mockPaymentId,
+            signature: mockSignature,
+            rechargeId,
+          });
+
+          const rechargeData = verifyRes.data.data;
+          toast.success('Payment successful! Recharge completed.');
+          navigate('/success', {
+            state: {
+              recharge: {
+                ...rechargeData,
+                operator: operatorName,
+                mobileNumber,
+                amount,
+              },
+            },
+          });
+          return;
+        } catch (err) {
+          console.error('Dev mock verify error:', err);
+          toast.error('Payment verification failed');
+          setError('Payment verification failed. Please contact support.');
+          setIsProcessing(false);
+          return;
+        }
+      }
 
       const options = {
         key: keyId,
@@ -173,6 +212,13 @@ export default function Payment({ rechargeDetails: propRechargeDetails }) {
       // If wallet payment, proceed directly
       if (selectedPaymentMethod === 'wallet') {
         toast.success('Payment successful! Recharge completed.');
+        // Refresh profile to update wallet balance in UI
+        try {
+          await refreshProfile();
+        } catch (e) {
+          console.warn('Failed to refresh profile after wallet payment', e);
+        }
+
         navigate('/success', { 
           state: { 
             recharge: {
