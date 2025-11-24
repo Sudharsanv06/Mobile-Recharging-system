@@ -91,6 +91,6 @@ describe('authController.verifyOTP', () => {
     const req = { body: { otp: '1234' }, user: { id: 'u1' } };
     const res = { status: jest.fn().mockReturnThis(), json: jest.fn() };
     await authController.verifyOTP(req, res);
-    expect(res.json).toHaveBeenCalledWith({ success: true, message: 'OTP verified successfully', data: { user } });
+    expect(res.json).toHaveBeenCalledWith({ success: true, message: 'Phone number verified successfully', data: { user } });
   });
 });
