@@ -23,8 +23,16 @@ const PORT = process.env.PORT || 5000;
 connectDB();
 
 const server = http.createServer(app);
+// Initialize socket.io
+const { initSocket } = require('./config/socket');
 
 // Bind to 0.0.0.0 explicitly to prefer IPv4 and avoid potential ::1/127.0.0.1 binding issues
 server.listen(PORT, '0.0.0.0', () => {
   logger.info(`Server running on port ${PORT}`);
+  try {
+    initSocket(server);
+    logger.info('Socket.io initialized');
+  } catch (e) {
+    logger.warn('Socket.io failed to initialize', { error: e.message });
+  }
 });

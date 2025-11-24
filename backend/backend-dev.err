@@ -1,0 +1,208 @@
+node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module './middleware/requestId'
+Require stack:
+- C:\Users\sudha\OneDrive\Desktop\project\mobile-recharge-app\backend\app.js
+- C:\Users\sudha\OneDrive\Desktop\project\mobile-recharge-app\backend\server.js
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Module.require (node:internal/modules/cjs/loader:1487:12)
+    at require (node:internal/modules/helpers:135:16)
+    at Object.<anonymous> (C:\Users\sudha\OneDrive\Desktop\project\mobile-recharge-app\backend\app.js:8:19)
+    at Module._compile (node:internal/modules/cjs/loader:1730:14) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [
+    'C:\\Users\\sudha\\OneDrive\\Desktop\\project\\mobile-recharge-app\\backend\\app.js',
+    'C:\\Users\\sudha\\OneDrive\\Desktop\\project\\mobile-recharge-app\\backend\\server.js'
+  ]
+}
+
+Node.js v22.17.0
+node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module './routes/adminRoutes'
+Require stack:
+- C:\Users\sudha\OneDrive\Desktop\project\mobile-recharge-app\backend\app.js
+- C:\Users\sudha\OneDrive\Desktop\project\mobile-recharge-app\backend\server.js
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Module.require (node:internal/modules/cjs/loader:1487:12)
+    at require (node:internal/modules/helpers:135:16)
+    at Object.<anonymous> (C:\Users\sudha\OneDrive\Desktop\project\mobile-recharge-app\backend\app.js:54:21)
+    at Module._compile (node:internal/modules/cjs/loader:1730:14) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [
+    'C:\\Users\\sudha\\OneDrive\\Desktop\\project\\mobile-recharge-app\\backend\\app.js',
+    'C:\\Users\\sudha\\OneDrive\\Desktop\\project\\mobile-recharge-app\\backend\\server.js'
+  ]
+}
+
+Node.js v22.17.0
+node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module './routes/adminRoutes'
+Require stack:
+- C:\Users\sudha\OneDrive\Desktop\project\mobile-recharge-app\backend\app.js
+- C:\Users\sudha\OneDrive\Desktop\project\mobile-recharge-app\backend\server.js
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Module.require (node:internal/modules/cjs/loader:1487:12)
+    at require (node:internal/modules/helpers:135:16)
+    at Object.<anonymous> (C:\Users\sudha\OneDrive\Desktop\project\mobile-recharge-app\backend\app.js:54:21)
+    at Module._compile (node:internal/modules/cjs/loader:1730:14) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [
+    'C:\\Users\\sudha\\OneDrive\\Desktop\\project\\mobile-recharge-app\\backend\\app.js',
+    'C:\\Users\\sudha\\OneDrive\\Desktop\\project\\mobile-recharge-app\\backend\\server.js'
+  ]
+}
+
+Node.js v22.17.0
+node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module './routes/adminRoutes'
+Require stack:
+- C:\Users\sudha\OneDrive\Desktop\project\mobile-recharge-app\backend\app.js
+- C:\Users\sudha\OneDrive\Desktop\project\mobile-recharge-app\backend\server.js
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Module.require (node:internal/modules/cjs/loader:1487:12)
+    at require (node:internal/modules/helpers:135:16)
+    at Object.<anonymous> (C:\Users\sudha\OneDrive\Desktop\project\mobile-recharge-app\backend\app.js:54:21)
+    at Module._compile (node:internal/modules/cjs/loader:1730:14) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [
+    'C:\\Users\\sudha\\OneDrive\\Desktop\\project\\mobile-recharge-app\\backend\\app.js',
+    'C:\\Users\\sudha\\OneDrive\\Desktop\\project\\mobile-recharge-app\\backend\\server.js'
+  ]
+}
+
+Node.js v22.17.0
+node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module './routes/paymentRoutes'
+Require stack:
+- C:\Users\sudha\OneDrive\Desktop\project\mobile-recharge-app\backend\app.js
+- C:\Users\sudha\OneDrive\Desktop\project\mobile-recharge-app\backend\server.js
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Module.require (node:internal/modules/cjs/loader:1487:12)
+    at require (node:internal/modules/helpers:135:16)
+    at Object.<anonymous> (C:\Users\sudha\OneDrive\Desktop\project\mobile-recharge-app\backend\app.js:55:23)
+    at Module._compile (node:internal/modules/cjs/loader:1730:14) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [
+    'C:\\Users\\sudha\\OneDrive\\Desktop\\project\\mobile-recharge-app\\backend\\app.js',
+    'C:\\Users\\sudha\\OneDrive\\Desktop\\project\\mobile-recharge-app\\backend\\server.js'
+  ]
+}
+
+Node.js v22.17.0
+node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module './routes/notificationRoutes'
+Require stack:
+- C:\Users\sudha\OneDrive\Desktop\project\mobile-recharge-app\backend\app.js
+- C:\Users\sudha\OneDrive\Desktop\project\mobile-recharge-app\backend\server.js
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Module.require (node:internal/modules/cjs/loader:1487:12)
+    at require (node:internal/modules/helpers:135:16)
+    at Object.<anonymous> (C:\Users\sudha\OneDrive\Desktop\project\mobile-recharge-app\backend\app.js:56:28)
+    at Module._compile (node:internal/modules/cjs/loader:1730:14) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [
+    'C:\\Users\\sudha\\OneDrive\\Desktop\\project\\mobile-recharge-app\\backend\\app.js',
+    'C:\\Users\\sudha\\OneDrive\\Desktop\\project\\mobile-recharge-app\\backend\\server.js'
+  ]
+}
+
+Node.js v22.17.0
+node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module './routes/searchRoutes'
+Require stack:
+- C:\Users\sudha\OneDrive\Desktop\project\mobile-recharge-app\backend\app.js
+- C:\Users\sudha\OneDrive\Desktop\project\mobile-recharge-app\backend\server.js
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Module.require (node:internal/modules/cjs/loader:1487:12)
+    at require (node:internal/modules/helpers:135:16)
+    at Object.<anonymous> (C:\Users\sudha\OneDrive\Desktop\project\mobile-recharge-app\backend\app.js:57:22)
+    at Module._compile (node:internal/modules/cjs/loader:1730:14) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [
+    'C:\\Users\\sudha\\OneDrive\\Desktop\\project\\mobile-recharge-app\\backend\\app.js',
+    'C:\\Users\\sudha\\OneDrive\\Desktop\\project\\mobile-recharge-app\\backend\\server.js'
+  ]
+}
+
+Node.js v22.17.0
+node:internal/modules/cjs/loader:1404
+  throw err;
+  ^
+
+Error: Cannot find module './routes/favoriteRoutes'
+Require stack:
+- C:\Users\sudha\OneDrive\Desktop\project\mobile-recharge-app\backend\app.js
+- C:\Users\sudha\OneDrive\Desktop\project\mobile-recharge-app\backend\server.js
+    at Function._resolveFilename (node:internal/modules/cjs/loader:1401:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1057:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1062:22)
+    at Function._load (node:internal/modules/cjs/loader:1211:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:235:24)
+    at Module.require (node:internal/modules/cjs/loader:1487:12)
+    at require (node:internal/modules/helpers:135:16)
+    at Object.<anonymous> (C:\Users\sudha\OneDrive\Desktop\project\mobile-recharge-app\backend\app.js:58:24)
+    at Module._compile (node:internal/modules/cjs/loader:1730:14) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [
+    'C:\\Users\\sudha\\OneDrive\\Desktop\\project\\mobile-recharge-app\\backend\\app.js',
+    'C:\\Users\\sudha\\OneDrive\\Desktop\\project\\mobile-recharge-app\\backend\\server.js'
+  ]
+}
+
+Node.js v22.17.0

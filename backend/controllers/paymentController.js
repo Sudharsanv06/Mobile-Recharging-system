@@ -19,7 +19,8 @@ if (process.env.RAZORPAY_KEY_ID && process.env.RAZORPAY_KEY_SECRET) {
  */
 exports.createOrder = async (req, res) => {
   try {
-    if (!razorpayInstance) {
+    const isDevMock = !razorpayInstance && process.env.NODE_ENV === 'development';
+    if (!razorpayInstance && !isDevMock) {
       return res.status(503).json({
         success: false,
         message: 'Payment gateway not configured',
@@ -48,6 +49,9 @@ exports.createOrder = async (req, res) => {
           message: 'Recharge not found',
         });
       }
+
+      // Attach order metadata to recharge record to track payment flow
+      // We'll save razorpayOrderId once created below
     }
 
     const options = {
@@ -60,7 +64,41 @@ exports.createOrder = async (req, res) => {
       },
     };
 
+    if (isDevMock) {
+      // Return a mock order so frontend can proceed in development.
+      const mockOrder = {
+        id: `order_mock_${Date.now()}`,
+        amount: options.amount,
+        currency: options.currency,
+      };
+      return res.json({
+        success: true,
+        data: {
+          orderId: mockOrder.id,
+          amount: mockOrder.amount,
+          currency: mockOrder.currency,
+          keyId: process.env.RAZORPAY_KEY_ID || 'rzp_test_mock',
+        },
+      });
+    }
+
     const order = await razorpayInstance.orders.create(options);
+
+    // If a rechargeId was supplied, store orderId and status on the recharge
+    if (rechargeId) {
+      try {
+        const recharge = await Recharge.findOne({ _id: rechargeId, user: req.user.id });
+        if (recharge) {
+          recharge.razorpayOrderId = order.id;
+          recharge.paymentStatus = 'created';
+          recharge.status = 'pending';
+          recharge.paymentMeta = { ...(recharge.paymentMeta || {}), orderReceipt: options.receipt };
+          await recharge.save();
+        }
+      } catch (err) {
+        logger.warn('Failed to attach order to recharge', { error: err.message });
+      }
+    }
 
     res.json({
       success: true,
@@ -94,18 +132,24 @@ exports.verifyPayment = async (req, res) => {
       });
     }
 
-    // Verify signature
-    const generatedSignature = crypto
-      .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET)
-      .update(`${orderId}|${paymentId}`)
-      .digest('hex');
+    const isDevMock = !razorpayInstance && process.env.NODE_ENV === 'development';
 
-    if (generatedSignature !== signature) {
-      logger.warn('Invalid payment signature', { orderId, paymentId });
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid payment signature',
-      });
+    // Verify signature (skip/accept in development mock mode)
+    if (!isDevMock) {
+      const generatedSignature = crypto
+        .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET)
+        .update(`${orderId}|${paymentId}`)
+        .digest('hex');
+
+      if (generatedSignature !== signature) {
+        logger.warn('Invalid payment signature', { orderId, paymentId });
+        return res.status(400).json({
+          success: false,
+          message: 'Invalid payment signature',
+        });
+      }
+    } else {
+      logger.info('Development mock payment verification: skipping signature check');
     }
 
     // Find and update recharge
@@ -213,6 +257,20 @@ exports.webhook = async (req, res) => {
           webhookEvent: event,
         };
         await recharge.save();
+
+        // Send confirmation SMS to user and recharged number (best-effort)
+        try {
+          const userObj = await User.findById(recharge.user);
+          if (userObj && userObj.phone) {
+            const userMessage = `Your payment of ₹${recharge.amount} for ${recharge.mobileNumber} was successful. Transaction ID: ${recharge.transactionId}`;
+            await sendSMS(userObj.phone, userMessage);
+          }
+
+          const rechargeMessage = `Your mobile number ${recharge.mobileNumber} has been recharged with ₹${recharge.amount}. Plan: ${recharge.plan?.description || ''}. Transaction ID: ${recharge.transactionId}. Thank you for using Top It Up!`;
+          await sendSMS(recharge.mobileNumber, rechargeMessage);
+        } catch (smsErr) {
+          logger.warn('Failed to send confirmation SMS after webhook update', { error: smsErr.message });
+        }
 
         logger.info('Recharge updated via webhook', {
           rechargeId: recharge._id,

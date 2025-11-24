@@ -57,8 +57,15 @@ const notificationRoutes = require('./routes/notificationRoutes');
 const searchRoutes = require('./routes/searchRoutes');
 const favoriteRoutes = require('./routes/favoriteRoutes');
 
-// Body parser
-app.use(express.json());
+// Body parser with raw body capture for webhook signature verification
+app.use(
+  express.json({
+    verify: (req, _res, buf) => {
+      // store raw body string for HMAC verification in webhooks
+      if (buf && buf.length) req.rawBody = buf.toString();
+    },
+  })
+);
 
 // Request ID middleware (adds X-Request-Id)
 app.use(requestId);
