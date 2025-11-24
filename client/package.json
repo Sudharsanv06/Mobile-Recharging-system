@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "test": "vitest",
+    "test": "vitest --config vitest.config.js --run",
+    "test:watch": "vitest --config vitest.config.js",
     "test:e2e": "playwright test",
     "build": "vite build",
     "lint": "eslint .",
@@ -48,6 +49,13 @@
     "environment": "jsdom",
     "setupFiles": [
       "src/setupTests.js"
+    ],
+    "include": [
+      "src/**/*.test.{js,jsx}",
+      "src/**/__tests__/**/*.test.{js,jsx}",
+      "src/**/__tests__/**/*.{test,spec}.{js,jsx}"
     ]
+    ,
+    "exclude": ["e2e/**"]
   }
 }
