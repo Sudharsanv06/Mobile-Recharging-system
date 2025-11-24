@@ -4,6 +4,10 @@ import { useNavigate } from 'react-router-dom';
 import './Jio.css';
 import './Operator.css';
 import JioLogo from './reliance-jio-logo-1.svg';
+import api from '../utils/api';
+import LoadingSkeleton from './LoadingSkeleton';
+import { z } from 'zod';
+import { toast } from '../utils/toast';
 
 const Jio = ({ isAuthenticated, currentUser, onRechargeInitiate }) => {
   const [mobileNumber, setMobileNumber] = useState('');
@@ -42,15 +46,12 @@ const Jio = ({ isAuthenticated, currentUser, onRechargeInitiate }) => {
     ]
   };
 
-  useEffect(() => { if (!isAuthenticated) navigate('/login'); }, [isAuthenticated, navigate]);
-
   useEffect(() => {
     const fetchOperator = async () => {
       setLoading(true);
       try {
-        const res = await fetch('http://localhost:5000/api/v1/operators');
-        const resJson = await res.json();
-        const operators = resJson?.data || resJson;
+        const res = await api.get('/api/v1/operators');
+        const operators = res?.data?.data || res?.data || [];
         const found = Array.isArray(operators) ? operators.find(op => op.name === 'Jio') : null;
         setOperator(found || fallbackPlans);
       } catch (e) {
@@ -84,8 +85,9 @@ const Jio = ({ isAuthenticated, currentUser, onRechargeInitiate }) => {
   const displayCategories = ['recommended','unlimited','entertainment','monthly','yearly','roaming','special','all'];
 
   const handleRecharge = (pack) => {
-    if (!mobileNumber) { alert('Please enter mobile number'); return; }
-    if (mobileNumber.length !== 10 || !/^\d{10}$/.test(mobileNumber)) { alert('Enter a valid 10-digit number'); return; }
+    const schema = z.object({ mobileNumber: z.string().regex(/^\d{10}$/, 'Enter a valid 10-digit mobile number') });
+    const v = schema.safeParse({ mobileNumber });
+    if (!v.success) { toast.error(v.error.errors[0].message); return; }
     const rechargeDetails = { ...pack, mobileNumber, operator: 'Jio', operatorId: operator?._id, planId: pack._id };
     if (typeof onRechargeInitiate === 'function') onRechargeInitiate(rechargeDetails);
     navigate('/payment', { state: rechargeDetails });
@@ -164,7 +166,7 @@ const Jio = ({ isAuthenticated, currentUser, onRechargeInitiate }) => {
 
           <div className="packs-grid">
             {loading ? (
-              <div className="loading">Loading plans…</div>
+              <LoadingSkeleton rows={6} height={80} />
             ) : (
               filteredPacks.length === 0 ? (
                 <div className="empty">No plans match your search.</div>

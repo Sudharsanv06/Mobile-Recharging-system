@@ -4,6 +4,10 @@ import { useNavigate } from 'react-router-dom';
 import './Vi.css';
 import './Operator.css';
 import ViLogo from './vi-logo.svg';
+import api from '../utils/api';
+import LoadingSkeleton from './LoadingSkeleton';
+import { z } from 'zod';
+import { toast } from '../utils/toast';
 
 const Vi = ({ isAuthenticated, currentUser, onRechargeInitiate }) => {
 	const [mobileNumber, setMobileNumber] = useState('');
@@ -33,9 +37,20 @@ const Vi = ({ isAuthenticated, currentUser, onRechargeInitiate }) => {
 	useEffect(()=>{ if(!isAuthenticated) navigate('/login'); },[isAuthenticated,navigate]);
 
 	useEffect(()=>{
-		const fetchOp=async()=>{ setLoading(true); try{ const res=await fetch('http://localhost:5000/api/v1/operators'); const json=await res.json(); const ops=json?.data||json; const found=Array.isArray(ops)?ops.find(o=>o.name==='Vi'):null; setOperator(found||fallbackPlans);}catch(e){ setOperator(fallbackPlans);}finally{setLoading(false)} };
-		fetchOp();
-	},[]);
+			const fetchOp=async()=>{
+				setLoading(true);
+				try{
+					const res = await api.get('/api/v1/operators');
+					const json = res?.data?.data || res?.data || [];
+					const ops = json;
+					const found = Array.isArray(ops) ? ops.find(o => o.name === 'Vi') : null;
+					setOperator(found || fallbackPlans);
+				} catch (e) {
+					setOperator(fallbackPlans);
+				} finally { setLoading(false); }
+			};
+			fetchOp();
+		},[]);
 
 	const categorizePlans = (plans) => {
 		if(!plans) return {};
@@ -48,7 +63,14 @@ const Vi = ({ isAuthenticated, currentUser, onRechargeInitiate }) => {
 	const filteredPacks = rechargePacks[selectedCategory] ? rechargePacks[selectedCategory].filter(pack=> pack.amount.toString().includes(searchQuery) || (pack.description||'').toLowerCase().includes(searchQuery.toLowerCase())) : [];
 	const displayCategories = ['recommended','unlimited','entertainment','monthly','yearly','roaming','special','all'];
 
-	const handleRecharge=(pack)=>{ if(!mobileNumber){ alert('Please enter mobile number'); return } if(mobileNumber.length!==10||!/^\d{10}$/.test(mobileNumber)){ alert('Enter a valid 10-digit number'); return } const rechargeDetails={...pack,mobileNumber,operator:'Vi',operatorId:operator?._id,planId:pack._id}; if(typeof onRechargeInitiate==='function') onRechargeInitiate(rechargeDetails); navigate('/payment',{state:rechargeDetails}); };
+	const handleRecharge = (pack) => {
+		const schema = z.object({ mobileNumber: z.string().regex(/^\d{10}$/, 'Enter a valid 10-digit mobile number') });
+		const v = schema.safeParse({ mobileNumber });
+		if (!v.success) { toast.error(v.error.errors[0].message); return; }
+		const rechargeDetails = { ...pack, mobileNumber, operator: 'Vi', operatorId: operator?._id, planId: pack._id };
+		if (typeof onRechargeInitiate === 'function') onRechargeInitiate(rechargeDetails);
+		navigate('/payment', { state: rechargeDetails });
+	};
 
 		if (!isAuthenticated) return null;
 
@@ -123,7 +145,7 @@ const Vi = ({ isAuthenticated, currentUser, onRechargeInitiate }) => {
 
 						<div className="packs-grid">
 							{loading ? (
-								<div className="loading">Loading plans…</div>
+								<LoadingSkeleton rows={6} height={80} />
 							) : (
 								filteredPacks.length === 0 ? (
 									<div className="empty">No plans match your search.</div>

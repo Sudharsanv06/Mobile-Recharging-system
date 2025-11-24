@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Home from './components/Home';
+import ProtectedRoute from './components/ProtectedRoute';
 import Login from './components/Login';
 import Signup from './components/Signup';
 import Profile from './components/Profile';
@@ -10,40 +11,34 @@ import Jio from './components/Jio';
 import Vi from './components/Vi';
 import BSNL from './components/BSNL';
 import Payment from './components/Payment';
+import Success from './components/Success';
 import About from './components/About';
 import OperatorsList from './components/OperatorsList';
 import OperatorDetails from './components/OperatorDetails';
 
 import './App.css';
-import Toast from './components/Toast';
+import { useAuth } from './contexts/authContext';
 import Receipt from './components/Receipt';
 import Dashboard from './components/Dashboard';
 import RechargeHistory from './components/RechargeHistory';
 import WalletModal from './components/WalletModal';
+import AdminDashboard from './components/AdminDashboard';
+import AdminProtectedRoute from './components/AdminProtectedRoute';
+import NotificationCenter from './components/NotificationCenter';
+import PlanSearch from './components/PlanSearch';
+import Favorites from './components/Favorites';
 
 const App = () => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [currentUser, setCurrentUser] = useState('');
   const [rechargeDetails, setRechargeDetails] = useState(null);
   const [showWallet, setShowWallet] = useState(false);
   const [balanceUpdated, setBalanceUpdated] = useState(false);
-
-  const handleLogin = (username) => {
-    setIsAuthenticated(true);
-    setCurrentUser(username);
-  };
-
-  const handleSignup = (username) => {
-    setIsAuthenticated(true);
-    setCurrentUser(username);
-  };
+  const { user, logout } = useAuth();
 
   const handleLogout = () => {
-    setIsAuthenticated(false);
     setCurrentUser('');
     setRechargeDetails(null);
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
+    logout();
   };
 
   const handleRechargeInitiate = (details) => {
@@ -51,123 +46,111 @@ const App = () => {
   };
 
   // Initialize auth state from localStorage so routes stay protected after reload
-  useEffect(() => {
-    const token = localStorage.getItem('token');
-    const user = JSON.parse(localStorage.getItem('user') || 'null');
-    if (token && user) {
-      setIsAuthenticated(true);
-      setCurrentUser(user.name || user.email || '');
-    }
-  }, []);
+  // sync local `currentUser` display with auth context
+  React.useEffect(() => {
+    if (user) setCurrentUser(user.name || user.email || '');
+    else setCurrentUser('');
+  }, [user]);
 
   return (
     <div className="app">
       <Navbar 
-        isAuthenticated={isAuthenticated} 
+        isAuthenticated={!!user} 
         currentUser={currentUser}
         onLogout={handleLogout} 
       />
       <main className="main-content">
-        <Toast />
+        
         <Routes>
           <Route 
             path="/" 
             element={
               <Home 
-                isAuthenticated={isAuthenticated} 
+                isAuthenticated={!!user} 
                 currentUser={currentUser}
               />
             } 
           />
           <Route 
             path="/login" 
-            element={isAuthenticated ? <Navigate to="/" replace /> : <Login onLogin={handleLogin} />} 
+            element={user ? <Navigate to="/" replace /> : <Login />} 
           />
           <Route 
             path="/signup" 
-            element={isAuthenticated ? <Navigate to="/" replace /> : <Signup onSignup={handleSignup} />} 
+            element={user ? <Navigate to="/" replace /> : <Signup />} 
           />
-          <Route 
-            path="/profile" 
-            element={isAuthenticated ? <Profile currentUser={currentUser} /> : <Navigate to="/login" replace />} 
-          />
-          <Route 
-            path="/airtel" 
+          <Route
+            path="/profile"
             element={
-              isAuthenticated ? (
-                <Airtel 
-                  isAuthenticated={isAuthenticated} 
-                  currentUser={currentUser}
-                  onRechargeInitiate={handleRechargeInitiate}
-                />
-              ) : (
-                <Navigate to="/login" replace />
-              )
-            } 
+              <ProtectedRoute>
+                <Profile />
+              </ProtectedRoute>
+            }
           />
-          <Route 
-            path="/jio" 
+          <Route
+            path="/airtel"
             element={
-              isAuthenticated ? (
-                <Jio 
-                  isAuthenticated={isAuthenticated} 
-                  currentUser={currentUser}
-                  onRechargeInitiate={handleRechargeInitiate}
-                />
-              ) : (
-                <Navigate to="/login" replace />
-              )
-            } 
+              <ProtectedRoute>
+                <Airtel onRechargeInitiate={handleRechargeInitiate} />
+              </ProtectedRoute>
+            }
           />
-          <Route 
-            path="/vi" 
+          <Route
+            path="/jio"
             element={
-              isAuthenticated ? (
-                <Vi 
-                  isAuthenticated={isAuthenticated} 
-                  currentUser={currentUser}
-                  onRechargeInitiate={handleRechargeInitiate}
-                />
-              ) : (
-                <Navigate to="/login" replace />
-              )
-            } 
+              <ProtectedRoute>
+                <Jio onRechargeInitiate={handleRechargeInitiate} />
+              </ProtectedRoute>
+            }
           />
-          <Route 
-            path="/bsnl" 
+          <Route
+            path="/vi"
             element={
-              isAuthenticated ? (
-                <BSNL 
-                  isAuthenticated={isAuthenticated} 
-                  currentUser={currentUser}
-                  onRechargeInitiate={handleRechargeInitiate}
-                />
-              ) : (
-                <Navigate to="/login" replace />
-              )
-            } 
+              <ProtectedRoute>
+                <Vi onRechargeInitiate={handleRechargeInitiate} />
+              </ProtectedRoute>
+            }
           />
-          <Route 
-            path="/payment" 
+          <Route
+            path="/bsnl"
             element={
-              isAuthenticated && rechargeDetails ? (
-                <Payment 
-                  isAuthenticated={isAuthenticated} 
-                  currentUser={currentUser}
-                  rechargeDetails={rechargeDetails}
-                />
-              ) : (
-                <Navigate to="/" replace />
-              )
-            } 
+              <ProtectedRoute>
+                <BSNL onRechargeInitiate={handleRechargeInitiate} />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/payment"
+            element={
+              <ProtectedRoute>
+                <Payment rechargeDetails={rechargeDetails} />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/success"
+            element={
+              <ProtectedRoute>
+                <Success />
+              </ProtectedRoute>
+            }
           />
           <Route
             path="/dashboard"
-            element={isAuthenticated ? <Dashboard onOpenWallet={() => setShowWallet(true)} balanceUpdated={balanceUpdated} /> : <Navigate to="/login" replace />}
+            element={
+              <ProtectedRoute>
+                <Dashboard onOpenWallet={() => setShowWallet(true)} balanceUpdated={balanceUpdated} />
+              </ProtectedRoute>
+            }
           />
           <Route
             path="/history"
-            element={isAuthenticated ? <RechargeHistory /> : <Navigate to="/login" replace />}
+            element={
+              <ProtectedRoute>
+                <RechargeHistory />
+              </ProtectedRoute>
+            }
           />
           <Route
             path="/receipt"
@@ -184,6 +167,38 @@ const App = () => {
           <Route
             path="/operators/:operatorId"
             element={<OperatorDetails />}
+          />
+          <Route
+            path="/admin"
+            element={
+              <AdminProtectedRoute>
+                <AdminDashboard />
+              </AdminProtectedRoute>
+            }
+          />
+          <Route
+            path="/notifications"
+            element={
+              <ProtectedRoute>
+                <NotificationCenter />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/search"
+            element={
+              <ProtectedRoute>
+                <PlanSearch />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/favorites"
+            element={
+              <ProtectedRoute>
+                <Favorites />
+              </ProtectedRoute>
+            }
           />
         </Routes>
       </main>

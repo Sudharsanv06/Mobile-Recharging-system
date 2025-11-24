@@ -1,51 +1,44 @@
 import React, { useState } from 'react';
+import { z } from 'zod';
 import { Link, useNavigate } from 'react-router-dom';
-import { Button, Card, LoadingSpinner, ErrorMessage } from './common';
-import { toast } from '../utils/toast';
+import { Button, Card, ErrorMessage } from './common';
 import './Login.css';
+import { useAuth } from '../contexts/authContext';
 
-const Login = ({ onLogin }) => {
+const Login = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { login } = useAuth();
+
+  const validate = () => {
+    const schema = z.object({
+      emailOrUsername: z.string().min(1, 'Email or username is required'),
+      password: z.string().min(8, 'Password must be at least 8 characters'),
+    });
+    const result = schema.safeParse({ emailOrUsername: username.trim(), password: password });
+    if (!result.success) return result.error.errors[0].message;
+    return null;
+  };
 
   const handleLogin = async (e) => {
     e.preventDefault();
     setError('');
-
-    if (!username.trim() || !password.trim()) {
-      setError('Please enter both username and password');
+    const v = validate();
+    if (v) {
+      setError(v);
       return;
     }
-
     setLoading(true);
     try {
-      const response = await fetch('http://localhost:5000/api/v1/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ emailOrUsername: username.trim(), password: password.trim() })
-      });
-      const data = await response.json();
-      if (!response.ok) {
-        const errorMsg = data.msg || 'Invalid credentials';
-        setError(errorMsg);
-        toast.error(errorMsg);
-        return;
+      const resp = await login({ emailOrUsername: username.trim(), password: password.trim() });
+      if (resp.ok) {
+        navigate('/');
+      } else {
+        setError(resp.message || 'Invalid credentials');
       }
-      // Save token and user to localStorage
-      const token = data?.data?.token;
-      const user = data?.data?.user;
-      if (token) localStorage.setItem('token', token);
-      if (user) localStorage.setItem('user', JSON.stringify(user));
-      toast.success('Login successful! Welcome back.');
-      onLogin(user?.name || username.trim());
-      navigate('/');
-    } catch (err) {
-      const errorMsg = 'Server error. Please try again.';
-      setError(errorMsg);
-      toast.error(errorMsg);
     } finally {
       setLoading(false);
     }
@@ -58,7 +51,7 @@ const Login = ({ onLogin }) => {
           <h2>Welcome Back!</h2>
           <p className="login-subtitle">Sign in to continue to Top It Up</p>
         </div>
-        
+
         {error && (
           <ErrorMessage 
             message={error} 
@@ -66,7 +59,7 @@ const Login = ({ onLogin }) => {
             onDismiss={() => setError('')}
           />
         )}
-        
+
         <form onSubmit={handleLogin} className="login-form">
           <div className="form-group">
             <label htmlFor="username" className="form-label">Email or Username</label>
@@ -81,7 +74,7 @@ const Login = ({ onLogin }) => {
               required
             />
           </div>
-          
+
           <div className="form-group">
             <label htmlFor="password" className="form-label">Password</label>
             <input
@@ -95,7 +88,7 @@ const Login = ({ onLogin }) => {
               required
             />
           </div>
-          
+
           <Button 
             type="submit" 
             variant="primary" 
@@ -107,7 +100,7 @@ const Login = ({ onLogin }) => {
             {loading ? 'Signing in...' : 'Sign In'}
           </Button>
         </form>
-        
+
         <div className="login-footer">
           <p className="login-footer-text">
             New to Top It Up? <Link to="/signup" className="link-primary">Create Account</Link>

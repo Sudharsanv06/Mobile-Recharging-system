@@ -1,20 +1,21 @@
+import { toast as hotToast } from 'react-hot-toast';
+
 /**
- * Utility function to show toast notifications
- * @param {string} message - The message to display
- * @param {string} type - Type of toast: 'success', 'error', 'warning', 'info'
- * @param {number} duration - Duration in milliseconds (default: 4000)
+ * Small compatibility wrapper so existing code can import `{ toast }` from this module.
+ * Use react-hot-toast under the hood.
  */
 export const showToast = (message, type = 'success', duration = 4000) => {
-  const event = new CustomEvent('app-show-toast', {
-    detail: { message, type, duration }
-  });
-  window.dispatchEvent(event);
+  if (type === 'success') hotToast.success(message, { duration });
+  else if (type === 'error') hotToast.error(message, { duration });
+  else if (type === 'warning') hotToast(message, { duration, icon: '⚠️' });
+  else hotToast(message, { duration });
 };
 
-// Convenience methods
 export const toast = {
-  success: (message, duration) => showToast(message, 'success', duration),
-  error: (message, duration) => showToast(message, 'error', duration),
-  warning: (message, duration) => showToast(message, 'warning', duration),
-  info: (message, duration) => showToast(message, 'info', duration),
+  success: (message, duration) => hotToast.success(message, { duration }),
+  error: (message, duration) => hotToast.error(message, { duration }),
+  warning: (message, duration) => hotToast(message, { duration, icon: '⚠️' }),
+  info: (message, duration) => hotToast(message, { duration }),
 };
+
+export default hotToast;

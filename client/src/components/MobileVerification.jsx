@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import './MobileVerification.css';
+import api from '../utils/api';
+import { z } from 'zod';
 
-const MobileVerification = ({ onVerificationComplete, onClose }) => {
+const MobileVerification = ({ onVerificationComplete, onVerified, onClose }) => {
   const [phoneNumber, setPhoneNumber] = useState('');
   const [otp, setOtp] = useState('');
   const [step, setStep] = useState('phone'); // 'phone' or 'otp'
@@ -10,8 +12,11 @@ const MobileVerification = ({ onVerificationComplete, onClose }) => {
   const [success, setSuccess] = useState('');
 
   const handleSendOTP = async () => {
-    if (!phoneNumber || phoneNumber.length !== 10) {
-      setError('Please enter a valid 10-digit mobile number');
+    // Validate with Zod
+    const schema = z.object({ phoneNumber: z.string().regex(/^\d{10}$/, 'Please enter a valid 10-digit mobile number') });
+    const v = schema.safeParse({ phoneNumber });
+    if (!v.success) {
+      setError(v.error.errors[0].message);
       return;
     }
 
@@ -19,22 +24,11 @@ const MobileVerification = ({ onVerificationComplete, onClose }) => {
     setError('');
 
     try {
-      const response = await fetch('http://localhost:5000/api/v1/verification/send-otp', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ phoneNumber }),
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
+      const res = await api.post('/api/v1/verification/send-otp', { phoneNumber });
+      if (res.status >= 200 && res.status < 300) {
         setSuccess('OTP sent successfully!');
         setStep('otp');
         setTimeout(() => setSuccess(''), 3000);
-      } else {
-        setError(data.msg || 'Failed to send OTP. Please check your Twilio configuration.');
       }
     } catch (error) {
       console.error('OTP Error:', error);
@@ -45,8 +39,10 @@ const MobileVerification = ({ onVerificationComplete, onClose }) => {
   };
 
   const handleVerifyOTP = async () => {
-    if (!otp || otp.length !== 6) {
-      setError('Please enter a valid 6-digit OTP');
+    const schema = z.object({ otp: z.string().regex(/^\d{6}$/, 'Please enter a valid 6-digit OTP') });
+    const v = schema.safeParse({ otp });
+    if (!v.success) {
+      setError(v.error.errors[0].message);
       return;
     }
 
@@ -54,23 +50,13 @@ const MobileVerification = ({ onVerificationComplete, onClose }) => {
     setError('');
 
     try {
-      const response = await fetch('http://localhost:5000/api/v1/verification/verify-otp', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ phoneNumber, otp }),
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
+      const res = await api.post('/api/v1/verification/verify-otp', { phoneNumber, otp });
+      if (res.status >= 200 && res.status < 300) {
         setSuccess('Mobile number verified successfully!');
         setTimeout(() => {
-          onVerificationComplete(phoneNumber);
+          if (typeof onVerificationComplete === 'function') onVerificationComplete(phoneNumber);
+          if (typeof onVerified === 'function') onVerified(phoneNumber);
         }, 1500);
-      } else {
-        setError(data.msg || 'Invalid OTP');
       }
     } catch (error) {
       setError('Network error. Please try again.');
