@@ -136,18 +136,20 @@ const Profile = ({ currentUser }) => {
             <h2 className="user-name">{user?.name}</h2>
             <div className="user-meta">{user?.email} · {user?.phone}</div>
             <div className="joined">Joined {user?.createdAt ? new Date(user.createdAt).toLocaleDateString() : '—'}</div>
-            <div className="balance">₹{user?.balance ?? 0}</div>
+            <div className="balance">{new Intl.NumberFormat('en-IN',{style:'currency',currency:'INR'}).format(Number(user?.balance||0))}</div>
             <div className="profile-actions-compact">
               <Button variant="primary" onClick={() => navigator.clipboard?.writeText(user?.email || '') || toast.info('Copied')}>Copy Email</Button>
-              <Button variant="outline" onClick={downloadPDF}>Download PDF</Button>
+              <Button variant="secondary" onClick={() => window.location.href = '/topup'}>Top Up</Button>
+              <Button variant="outline" onClick={downloadPDF}>Export PDF</Button>
+              <Button variant="ghost" onClick={() => toast.info('Edit profile coming soon')}>Edit</Button>
             </div>
           </div>
         </div>
 
         <div className="profile-right">
-          {!apiBase && (
+          {!api?.defaults?.baseURL && (
             <div className="config-note">
-              Backend API base not configured. Set `REACT_APP_API_BASE` in your `.env` (e.g. `REACT_APP_API_BASE=http://localhost:5000`) to enable full functionality.
+              Backend API base not configured. Set `VITE_API_BASE` in your `.env` (e.g. `VITE_API_BASE=http://localhost:5000`) or start the backend at <code>http://localhost:5000</code> to enable full functionality.
             </div>
           )}
           <div className="stats-row">
