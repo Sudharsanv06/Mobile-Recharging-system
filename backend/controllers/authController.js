@@ -96,13 +96,24 @@ exports.login = async (req, res) => {
   try {
     const { emailOrUsername, password } = req.body;
 
-    // Find user by email or name
-    const user = await User.findOne({
+    // Find user by email, name or phone (allow login via phone/email/username)
+    const query = {
       $or: [
         { email: emailOrUsername },
-        { name: emailOrUsername }
+        { name: emailOrUsername },
+        { phone: emailOrUsername }
       ]
-    });
+    };
+    // If it looks like an email, perform case-insensitive search
+    if (emailOrUsername && emailOrUsername.includes('@')) {
+      query.$or = [
+        { email: new RegExp(`^${emailOrUsername}$`, 'i') },
+        { name: emailOrUsername },
+        { phone: emailOrUsername }
+      ];
+    }
+
+    const user = await User.findOne(query);
     if (!user) {
       logger.warn('Login failed: user not found', { emailOrUsername });
       return res.status(400).json({ success: false, message: 'Invalid credentials' });

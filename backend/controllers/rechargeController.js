@@ -6,7 +6,7 @@ const sendSMS = require('../utils/sendSMS');
 // Create a new recharge
 exports.createRecharge = async (req, res) => {
   try {
-    const { operatorId, mobileNumber, planId, amount: bodyAmount } = req.body;
+    const { operatorId, mobileNumber, planId, amount: bodyAmount, paymentMethod } = req.body;
     const userId = req.user.id;
 
     // Get user
@@ -48,7 +48,46 @@ exports.createRecharge = async (req, res) => {
     // Generate transaction ID
     const transactionId = `TXN${Date.now()}${Math.floor(Math.random() * 1000)}`;
 
-    // Create recharge
+    // If paymentMethod is wallet, deduct balance immediately
+    const pm = paymentMethod || 'wallet';
+    if (pm === 'wallet') {
+      // Check sufficient funds
+      if (user.balance < amount) {
+        return res.status(400).json({ success: false, message: 'Insufficient wallet balance' });
+      }
+
+      // Deduct and save user
+      user.balance -= amount;
+      await user.save();
+
+      // Create recharge with wallet payment info
+      const recharge = new Recharge({
+        user: userId,
+        operator: operatorId || null,
+        mobileNumber,
+        plan,
+        amount,
+        transactionId,
+        status: 'success',
+        paymentMethod: 'wallet',
+        paymentStatus: 'completed',
+      });
+
+      await recharge.save();
+
+      // Send confirmation SMS to user (best-effort)
+      const userMessage = `Your recharge of ₹${amount} for ${mobileNumber} was successful. Transaction ID: ${transactionId}`;
+      await sendSMS(user.phone, userMessage);
+
+      // Send confirmation SMS to recharged number
+      const rechargeMessage = `Your mobile number ${mobileNumber} has been recharged with ₹${amount}. Plan: ${plan.description || ''}. Transaction ID: ${transactionId}. Thank you for using Top It Up!`;
+      await sendSMS(mobileNumber, rechargeMessage);
+
+      return res.status(200).json({ success: true, data: recharge });
+    }
+
+    // For non-wallet payments, create recharge as pending and let payment gateway handle completion
+    // Do not send SMS now — wait until payment is verified
     const recharge = new Recharge({
       user: userId,
       operator: operatorId || null,
@@ -56,18 +95,12 @@ exports.createRecharge = async (req, res) => {
       plan,
       amount,
       transactionId,
-      status: 'success',
+      status: 'pending',
+      paymentMethod: pm,
+      paymentStatus: 'pending',
     });
 
     await recharge.save();
-
-    // Send confirmation SMS to user (best-effort)
-    const userMessage = `Your recharge of ₹${amount} for ${mobileNumber} was successful. Transaction ID: ${transactionId}`;
-    await sendSMS(user.phone, userMessage);
-
-    // Send confirmation SMS to recharged number
-    const rechargeMessage = `Your mobile number ${mobileNumber} has been recharged with ₹${amount}. Plan: ${plan.description || ''}. Transaction ID: ${transactionId}. Thank you for using Top It Up!`;
-    await sendSMS(mobileNumber, rechargeMessage);
 
     return res.status(200).json({ success: true, data: recharge });
   } catch (err) {

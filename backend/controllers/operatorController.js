@@ -17,19 +17,29 @@ exports.getAllOperators = async (req, res) => {
   }
 };
 
-// Get operator by ID
+// Get operator by ID or by name/slug fallback
 exports.getOperatorById = async (req, res) => {
   try {
-    const operator = await Operator.findById(req.params.id);
+    const { id } = req.params;
+
+    // Try to find by ObjectId first
+    let operator = null;
+    if (/^[0-9a-fA-F]{24}$/.test(id)) {
+      operator = await Operator.findById(id);
+    }
+
+    // Fallback: try by name (case-insensitive)
+    if (!operator) {
+      operator = await Operator.findOne({ name: { $regex: `^${id}$`, $options: 'i' } });
+    }
+
     if (!operator) {
       return res.status(404).json({ msg: 'Operator not found' });
     }
+
     res.json(operator);
   } catch (err) {
     console.error(err.message);
-    if (err.kind === 'ObjectId') {
-      return res.status(404).json({ msg: 'Operator not found' });
-    }
     res.status(500).send('Server error');
   }
 };

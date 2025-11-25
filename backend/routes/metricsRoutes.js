@@ -11,6 +11,15 @@ function trackMetrics(req, res, next) {
 router.get('/metrics', (req, res) => {
   res.json({ success: true, message: 'metrics endpoint placeholder' });
 });
+module.exports = {
+  trackMetrics,
+  router,
+};
+
+// Health endpoint for quick readiness checks
+router.get('/health', (req, res) => {
+  res.json({ success: true, status: 'ok' });
+});
 
 module.exports = {
   trackMetrics,

@@ -1,14 +1,14 @@
 const User = require('../models/User');
 const Recharge = require('../models/Recharge');
 
-// Get user profile
+// Get user profile (consistent response shape)
 exports.getProfile = async (req, res) => {
   try {
     const user = await User.findById(req.user.id).select('-password -otp -otpExpires');
-    res.json(user);
+    res.json({ success: true, data: user });
   } catch (err) {
     console.error(err.message);
-    res.status(500).send('Server error');
+    res.status(500).json({ success: false, message: 'Server error' });
   }
 };
 
@@ -38,10 +38,10 @@ exports.getRechargeHistory = async (req, res) => {
     const recharges = await Recharge.find({ user: req.user.id })
       .sort({ createdAt: -1 })
       .populate('operator', 'name logo');
-    res.json(recharges);
+    res.json({ success: true, data: recharges });
   } catch (err) {
     console.error(err.message);
-    res.status(500).send('Server error');
+    res.status(500).json({ success: false, message: 'Server error' });
   }
 };
 
