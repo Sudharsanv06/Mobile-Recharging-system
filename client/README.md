@@ -14,7 +14,7 @@ Currently, two official plugins are available:
 
 Example `.env` (in `client/.env`):
 ```
-REACT_APP_API_BASE=http://localhost:5000
+VITE_API_BASE=http://localhost:5000
 ```
 
 ## Running the client
@@ -66,7 +66,7 @@ The `test:e2e` npm script (if present) will run Playwright tests.
 
 ## Notes
 
-- The app uses `REACT_APP_API_BASE` to determine the backend base URL. If not set, the Profile page will show a small configuration note but still render mockable UI in development and tests.
+- The app uses `VITE_API_BASE` to determine the backend base URL. If not set, the Profile page will show a small configuration note but still render mockable UI in development and tests.
 - Use `npm install --legacy-peer-deps` if you run into peer dependency conflicts when installing dev/testing libraries.
 
 ## Expanding the ESLint configuration
