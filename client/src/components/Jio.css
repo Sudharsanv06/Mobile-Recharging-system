@@ -72,6 +72,7 @@
   align-items: center;
 }
 
+.operator-logo{display:flex;align-items:center;gap:12px}
 .operator-logo img {
   height: 44px;
   object-fit: contain;

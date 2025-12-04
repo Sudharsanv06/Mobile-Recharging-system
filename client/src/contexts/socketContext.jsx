@@ -21,7 +21,7 @@ export const SocketProvider = ({ children }) => {
     }
 
     // Initialize socket connection
-    const apiBase = import.meta.env.VITE_API_BASE || 'http://localhost:5000';
+    const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:5000';
     const newSocket = io(apiBase, {
       auth: {
         token,

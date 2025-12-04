@@ -35,12 +35,14 @@
   font-size: 3rem;
   font-weight: 600;
   margin-bottom: 15px;
+  color: white;
 }
 
 .about-hero-content p {
   font-size: 1.3rem;
   max-width: 700px;
   margin: 0 auto;
+  color: white;
 }
 
 /* Company Overview */
@@ -58,8 +60,13 @@
 .overview-content h2 {
   font-size: 1.8rem;
   margin-bottom: 20px;
-  color: #2c2c2c;
+  color: #1e293b;
   font-weight: 600;
+  background: linear-gradient(135deg, #1e293b 0%, #334155 50%, #475569 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.15));
 }
 
 .overview-content p {
@@ -122,9 +129,14 @@
 
 .mission-card h3, .vision-card h3 {
   font-size: 1.2rem;
-  color: #2c2c2c;
+  color: #1e293b;
   margin-bottom: 10px;
   font-weight: 600;
+  background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.1));
 }
 
 .mission-card p, .vision-card p {
@@ -193,15 +205,20 @@
   font-size: 1.8rem;
   text-align: center;
   margin-bottom: 30px;
-  color: #2c2c2c;
+  color: #1e293b;
   font-weight: 600;
+  background: linear-gradient(135deg, #1e293b 0%, #334155 50%, #475569 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.15));
 }
 
 .team-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 15px;
-  max-width: 1100px;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 30px;
+  max-width: 900px;
   margin: 0 auto;
 }
 
@@ -230,11 +247,34 @@
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
 }
 
+.member-avatar-img.prabhu-img {
+  object-fit: cover;
+  transform: scale(1.5);
+  object-position: center center;
+}
+
+.member-avatar-img.saravana-img {
+  object-fit: cover;
+  transform: scale(1.5);
+  object-position: center center;
+}
+
+.member-avatar-img.shanmuga-img {
+  object-fit: cover;
+  transform: scale(1.5);
+  object-position: center center;
+}
+
 .team-member h4 {
   font-size: 1.1rem;
   margin-bottom: 5px;
-  color: #2c2c2c;
+  color: #1e293b;
   font-weight: 600;
+  background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.1));
 }
 
 .member-title {
@@ -262,6 +302,7 @@
   font-size: 2rem;
   margin-bottom: 15px;
   font-weight: 600;
+  color: #ffffff;
 }
 
 .cta-content p {

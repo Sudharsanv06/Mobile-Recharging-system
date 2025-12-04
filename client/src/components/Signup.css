@@ -39,10 +39,16 @@
 
 .signup-header h2 {
   margin: 0 0 var(--spacing-sm) 0;
-  color: var(--color-text-primary);
+  color: #1e293b;
   font-size: var(--font-size-3xl);
   font-weight: var(--font-weight-bold);
   line-height: var(--line-height-tight);
+  background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: none;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
 }
 
 .signup-subtitle {

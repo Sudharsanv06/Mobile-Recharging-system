@@ -84,34 +84,22 @@ const About = () => {
           <h2>Leadership Team</h2>
           <div className="team-grid">
             <div className="team-member">
-              <img src="https://randomuser.me/api/portraits/men/32.jpg" className="member-avatar-img" alt="CEO" />
+              <img src="/p.jpeg" className="member-avatar-img prabhu-img" alt="CEO" />
               <h4>Prabhu Chennimalai</h4>
               <p className="member-title">Chief Executive Officer</p>
               <p className="member-desc">15+ years in fintech and telecom industry</p>
             </div>
             <div className="team-member">
-              <img src="https://randomuser.me/api/portraits/women/45.jpg" className="member-avatar-img" alt="CTO" />
+              <img src="/sa.jpeg" className="member-avatar-img saravana-img" alt="CTO" />
               <h4>Saravana M</h4>
               <p className="member-title">Chief Technology Officer</p>
               <p className="member-desc">Former Google engineer with 12+ years experience</p>
             </div>
             <div className="team-member">
-              <img src="https://randomuser.me/api/portraits/men/54.jpg" className="member-avatar-img" alt="CFO" />
+              <img src="/sh.jpeg" className="member-avatar-img shanmuga-img" alt="CFO" />
               <h4>Shanmuga Patel Kani</h4>
               <p className="member-title">Chief Financial Officer</p>
               <p className="member-desc">CA with 10+ years in financial services</p>
-            </div>
-            <div className="team-member">
-              <img src="https://randomuser.me/api/portraits/women/65.jpg" className="member-avatar-img" alt="Customer" />
-              <h4>Sunita Kapoor</h4>
-              <p className="member-title">Head of Customer Experience</p>
-              <p className="member-desc">Expert in customer success and user experience</p>
-            </div>
-            <div className="team-member">
-              <img src="https://randomuser.me/api/portraits/women/68.jpg" className="member-avatar-img" alt="Head of Product" />
-              <h4>Asha Menon</h4>
-              <p className="member-title">Head of Product</p>
-              <p className="member-desc">Leads product strategy and roadmap with a strong UX focus</p>
             </div>
           </div>
         </div>

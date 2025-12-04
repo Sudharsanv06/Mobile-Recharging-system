@@ -52,16 +52,26 @@ const userRoutes = require('./routes/userRoutes');
 const verificationRoutes = require('./routes/verificationRoutes');
 const emailRoutes = require('./routes/email');
 const adminRoutes = require('./routes/adminRoutes');
-const paymentRoutes = require('./routes/paymentRoutes');
 const notificationRoutes = require('./routes/notificationRoutes');
 const searchRoutes = require('./routes/searchRoutes');
 const favoriteRoutes = require('./routes/favoriteRoutes');
 
-// Body parser with raw body capture for webhook signature verification
+// Import webhook handlers for special raw body handling
+const { verifyWebhook, webhookHandler } = require('./controllers/webhookController');
+
+// Webhook endpoint with raw body (MUST be before express.json middleware)
+// This endpoint needs the raw request body for HMAC signature verification
+app.post('/api/v1/payments/webhook', express.raw({ type: 'application/json' }), (req, res, next) => {
+  req.rawBody = req.body.toString('utf8');
+  req.body = JSON.parse(req.rawBody);
+  next();
+}, verifyWebhook, webhookHandler);
+
+// Body parser with raw body capture for other routes
 app.use(
   express.json({
     verify: (req, _res, buf) => {
-      // store raw body string for HMAC verification in webhooks
+      // store raw body string for HMAC verification if needed
       if (buf && buf.length) req.rawBody = buf.toString();
     },
   })
@@ -82,19 +92,42 @@ if (Sentry) {
 app.use(helmet());
 
 // CORS policy: restrict in production, open in development
-const allowedOrigins = process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(',') : [];
+const allowedOrigins = process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(',').map(o => o.trim()) : [];
 app.use(
   cors({
     origin: (origin, callback) => {
+      // Allow all requests in development
       if (process.env.NODE_ENV === 'development') return callback(null, true);
+      
+      // Reject requests with no origin (like curl)
       if (!origin) return callback(null, false);
-      if (allowedOrigins.length === 0) return callback(new Error('No allowed origins configured'));
-      if (allowedOrigins.indexOf(origin) !== -1) {
+      
+      // Check if no origins configured
+      if (allowedOrigins.length === 0) {
+        logger.warn('No ALLOWED_ORIGINS configured in production');
+        return callback(new Error('No allowed origins configured'));
+      }
+      
+      // Check exact match or wildcard pattern match
+      const isAllowed = allowedOrigins.some(allowed => {
+        // Exact match
+        if (allowed === origin) return true;
+        // Wildcard match (e.g., https://*.vercel.app)
+        if (allowed.includes('*')) {
+          const pattern = allowed.replace(/\*/g, '.*').replace(/\./g, '\\.');
+          return new RegExp(`^${pattern}$`).test(origin);
+        }
+        return false;
+      });
+      
+      if (isAllowed) {
         callback(null, true);
       } else {
+        logger.warn('CORS rejected origin', { origin, allowedOrigins });
         callback(new Error('Origin not allowed by CORS'));
       }
     },
+    credentials: true, // Allow cookies/auth headers
   })
 );
 
@@ -102,6 +135,19 @@ app.use(
 if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
 }
+
+// Health check endpoint (no auth required)
+app.get('/health', (_req, res) => {
+  const packageJson = require('./package.json');
+  res.json({
+    success: true,
+    status: 'ok',
+    version: packageJson.version,
+    uptime: process.uptime(),
+    timestamp: new Date().toISOString(),
+    env: process.env.NODE_ENV || 'development'
+  });
+});
 
 // Mount routers with rate limiting where appropriate
 app.use('/api/v1/auth', authLimiter, authRoutes);
@@ -111,6 +157,8 @@ app.use('/api/v1/users', userRoutes);
 app.use('/api/v1/verification', otpLimiter, verificationRoutes);
 app.use('/api/email', emailRoutes);
 app.use('/api/v1/admin', adminRoutes);
+// Payment routes (webhook is handled separately above with raw body)
+const paymentRoutes = require('./routes/paymentRoutes');
 app.use('/api/v1/payments', paymentRoutes);
 app.use('/api/v1/notifications', notificationRoutes);
 app.use('/api/v1/plans', searchRoutes);

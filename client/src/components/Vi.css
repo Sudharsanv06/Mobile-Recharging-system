@@ -59,6 +59,7 @@
   align-items: center;
 }
 
+.operator-logo{display:flex;align-items:center;gap:12px}
 .operator-logo img {
   height: 44px;
   object-fit: contain;
@@ -857,6 +858,7 @@
   margin-bottom: 12px;
   letter-spacing: -0.5px;
 }
+.pack-amount::before{content:'₹';font-size:.9rem;vertical-align:super;margin-right:2px}
 
 .pack-details {
   margin-bottom: 24px;
